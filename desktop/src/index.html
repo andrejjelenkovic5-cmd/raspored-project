@@ -303,6 +303,8 @@ input,select,textarea{font-family:inherit;font-size:14px;}
 .checkbox-row{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;}
 .checkbox-row input{width:auto;}
 .errbar{background:#FDEDED;color:#A32A2A;border:1px solid #F3C6C6;padding:8px 12px;border-radius:8px;font-size:12.5px;margin-bottom:14px;font-weight:600;}
+.upd-progress-track{width:100%;height:8px;background:var(--surface-2);border:1px solid var(--border);border-radius:5px;overflow:hidden;}
+.upd-progress-fill{height:100%;background:var(--accent);border-radius:5px;transition:width .2s ease;}
 .sound-map-list{display:flex;flex-direction:column;gap:4px;margin-top:4px;}
 .sound-map-row{display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;}
 .sound-map-initials{font-weight:800;font-size:12px;background:var(--accent-dim);color:var(--accent-ink);padding:2px 8px;border-radius:6px;flex-shrink:0;}
@@ -977,6 +979,7 @@ const state = {
   settingsModalOpen: false, settingsUnlocked: false, settingsError: null, settingsBusy: false,
   soundFormOpen: false, newSoundInitials: "", newSoundFile: null, soundFormBusy: false,
   theme: "light",
+  updateAvailable: null, updateProgress: null,
 };
 
 function getVisibleDates(){
@@ -1230,6 +1233,7 @@ function render(){
     ${state.reportModal ? renderReportModal() : ""}
     ${state.monthOverview ? renderMonthOverviewModal() : ""}
     ${state.settingsModalOpen ? renderSettingsModal() : ""}
+    ${state.updateAvailable ? renderUpdateModal() : ""}
     ${state.toast ? `<div class="toast">${escapeHtml(state.toast)}</div>` : ""}
     ${renderContextMenu()}
   `;
@@ -2174,6 +2178,8 @@ function bindEvents(){
     if(act==="remove-sound-mapping"){ await removeSoundMapping(t.dataset.initials); return; }
     if(act==="preview-sound"){ previewSound(t.dataset.initials); return; }
     if(act==="toggle-theme"){ toggleTheme(); return; }
+    if(act==="update-now"){ await startAppUpdate(); return; }
+    if(act==="update-later"){ dismissUpdatePrompt(); return; }
     if(act==="toggle-initials-picker"){ state.initialsPickerOpen = !state.initialsPickerOpen; render(); return; }
     if(act==="ov-toggle-emp"){
       const id = t.dataset.id;
@@ -3392,7 +3398,7 @@ function renderMonthOverviewModal(){
   </div>`;
 }
 
-const BUILD_ID = "2026-09-01 16:50 UTC";
+const BUILD_ID = "2026-09-01 18:05 UTC";
 console.log("Raspored build:", BUILD_ID);
 document.addEventListener("DOMContentLoaded", ()=>{
   const tag = document.createElement("div");
@@ -3401,6 +3407,85 @@ document.addEventListener("DOMContentLoaded", ()=>{
   document.body.appendChild(tag);
 });
 boot();
+
+/* ---- automatsko azuriranje - radi SAMO unutar desktop (Tauri) app-a, na webu se tiho preskace ----
+   Pita korisnika prije preuzimanja (ne skida se samo od sebe), i ako se odgodi, pita ponovno
+   sljedeci put kad se app pokrene (ne pamti "kasnije" izbor). Prikazuje pravu traku napretka. */
+let pendingUpdate = null;
+if(window.__TAURI__ && window.__TAURI__.updater){
+  (async ()=>{
+    try{
+      const update = await window.__TAURI__.updater.check();
+      if(update){
+        pendingUpdate = update;
+        state.updateAvailable = { version: update.version, currentVersion: update.currentVersion || "" };
+        render();
+      }
+    }catch(e){ console.error("Provjera ažuriranja nije uspjela:", e); }
+  })();
+}
+function renderUpdateModal(){
+  const p = state.updateProgress;
+  if(!p){
+    return `<div class="overlay">
+      <div class="modal" style="max-width:380px;">
+        <h3 style="margin:0 0 8px;">Dostupno je ažuriranje</h3>
+        <p style="color:var(--text-2);font-size:13.5px;margin:0 0 18px;">Nova verzija <b>${escapeHtml(state.updateAvailable.version)}</b> je dostupna${state.updateAvailable.currentVersion?" (trenutna: "+escapeHtml(state.updateAvailable.currentVersion)+")":""}.</p>
+        <div class="modal-actions"><div></div><div class="right">
+          <button class="btn btn-ghost" data-act="update-later">Kasnije</button>
+          <button class="btn btn-primary" data-act="update-now">Ažuriraj sada</button>
+        </div></div>
+      </div>
+    </div>`;
+  }
+  let statusText = "";
+  if(p.phase==="downloading") statusText = "Preuzimanje… "+p.pct+"%"+(p.total?" ("+(p.downloaded/1048576).toFixed(1)+" / "+(p.total/1048576).toFixed(1)+" MB)":"");
+  if(p.phase==="installing") statusText = "Instaliranje…";
+  if(p.phase==="done") statusText = "Gotovo! Ponovno pokrećem aplikaciju…";
+  if(p.phase==="error") statusText = "Greška: "+escapeHtml(p.errorMsg||"");
+  return `<div class="overlay">
+    <div class="modal" style="max-width:380px;">
+      <h3 style="margin:0 0 12px;">Ažuriranje u tijeku</h3>
+      <div class="upd-progress-track"><div class="upd-progress-fill" style="width:${p.pct||0}%"></div></div>
+      <p style="color:var(--text-2);font-size:13px;margin:10px 0 0;">${statusText}</p>
+      ${p.phase==="error" ? `<div class="modal-actions"><div></div><div class="right"><button class="btn btn-ghost" data-act="update-later">Zatvori</button></div></div>` : ""}
+    </div>
+  </div>`;
+}
+function dismissUpdatePrompt(){
+  state.updateAvailable = null; state.updateProgress = null;
+  render();
+}
+async function startAppUpdate(){
+  if(!pendingUpdate) return;
+  let total = 0, downloaded = 0;
+  state.updateProgress = { phase:"downloading", downloaded:0, total:0, pct:0 };
+  render();
+  try{
+    await pendingUpdate.downloadAndInstall((event)=>{
+      if(event.event==="Started"){
+        total = event.data.contentLength || 0;
+        state.updateProgress = { phase:"downloading", downloaded:0, total, pct:0 };
+        render();
+      } else if(event.event==="Progress"){
+        downloaded += event.data.chunkLength;
+        const pct = total>0 ? Math.min(100, Math.round(downloaded/total*100)) : 0;
+        state.updateProgress = { phase:"downloading", downloaded, total, pct };
+        render();
+      } else if(event.event==="Finished"){
+        state.updateProgress = { phase:"installing", downloaded, total, pct:100 };
+        render();
+      }
+    });
+    state.updateProgress = { phase:"done", pct:100 };
+    render();
+    setTimeout(async ()=>{ try{ await window.__TAURI__.process.relaunch(); }catch(e){} }, 900);
+  }catch(err){
+    console.error("Ažuriranje nije uspjelo:", err);
+    state.updateProgress = { phase:"error", errorMsg: err.message||String(err) };
+    render();
+  }
+}
 </script>
 </body>
 </html>
