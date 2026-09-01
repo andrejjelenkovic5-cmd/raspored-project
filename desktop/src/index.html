@@ -2111,6 +2111,16 @@ let suppressClickUntil = 0; // sprječava "duh-klik" na prazan slot ispod kartic
 
 function bindEvents(){
   const app = document.getElementById("app");
+  if(!window._externalLinkOpenerBound){
+    window._externalLinkOpenerBound = true;
+    document.addEventListener("click", (e)=>{
+      if(!window.__TAURI__ || !window.__TAURI__.opener) return; // samo unutar desktop (Tauri) app-a
+      const a = e.target.closest("a.hp-link, a.flag-link");
+      if(!a || !a.href) return;
+      e.preventDefault();
+      window.__TAURI__.opener.open(a.href).catch(err=>console.error("Otvaranje linka nije uspjelo:", err));
+    });
+  }
   if(!window._ctxMenuCloseBound){
     window._ctxMenuCloseBound = true;
     document.addEventListener("mousedown", (e)=>{
@@ -2439,17 +2449,41 @@ function buildMonthOverviewPdf(filenameBase){
   // ---- Iskoristenost kapaciteta (vizualne trake, kao na ekranu) ----
   ensureSpace(10);
   pdf.setFont("helvetica","bold"); pdf.setFontSize(11); pdf.setTextColor(30,30,30);
-  pdf.text("Iskoristenost kapaciteta", marginL, y); y += 7;
+  pdf.text("Iskoristenost kapaciteta", marginL, y); y += 8;
   if(!capacityStats.length){
     pdf.setFont("helvetica","normal"); pdf.setFontSize(9); pdf.setTextColor(130,130,130);
     pdf.text("Nema podataka za ovo razdoblje.", marginL, y); y += 8;
   } else {
     const barW = pageW - marginL - marginR - 45;
+    // Zbroj cijelog tima - jedan redak na vrhu, malo istaknutiji
+    const teamTotals = capacityStats.reduce((acc,x)=>({
+      bookedMin: acc.bookedMin+x.bookedMin, availableMin: acc.availableMin+x.availableMin,
+      vacationMin: acc.vacationMin+x.vacationMin,
+    }), {bookedMin:0, availableMin:0, vacationMin:0});
+    const teamPct = teamTotals.availableMin>0 ? Math.round(teamTotals.bookedMin/teamTotals.availableMin*100) : 0;
+    ensureSpace(16);
+    pdf.setFont("helvetica","bold"); pdf.setFontSize(9); pdf.setTextColor(30,30,30);
+    pdf.text("Cijeli tim", marginL, y);
+    const teamBarY = y+2.4, teamBarH = 4.2;
+    pdf.setFillColor(230,231,235);
+    pdf.roundedRect(marginL, teamBarY, barW, teamBarH, 1, 1, "F");
+    const teamFillW = teamPct>0 ? Math.max(barW*Math.min(100,teamPct)/100, 2) : 0;
+    if(teamFillW>0){ pdf.setFillColor(0,130,47); pdf.roundedRect(marginL, teamBarY, teamFillW, teamBarH, 1, 1, "F"); }
+    pdf.setFont("helvetica","bold"); pdf.setFontSize(9); pdf.setTextColor(40,40,40);
+    pdf.text(teamPct+"%", marginL+barW+4, y);
+    pdf.setFont("helvetica","normal"); pdf.setFontSize(7.3); pdf.setTextColor(110,110,110);
+    pdf.text(pdfSafe(minutesToHM(teamTotals.bookedMin)+" od "+minutesToHM(teamTotals.availableMin)+" dostupno ukupno"
+      +(teamTotals.vacationMin?" - "+minutesToHM(teamTotals.vacationMin)+" godisnji":"")), marginL, y+9.5);
+    pdf.setTextColor(30,30,30);
+    y += 15;
+    pdf.setDrawColor(225,227,231); pdf.setLineWidth(0.2);
+    pdf.line(marginL, y-4, marginL+barW+40, y-4);
+
     capacityStats.forEach(x=>{
-      ensureSpace(13);
+      ensureSpace(15.5);
       pdf.setFont("helvetica","bold"); pdf.setFontSize(8.5); pdf.setTextColor(40,40,40);
       pdf.text(pdfSafe(x.emp.name), marginL, y);
-      const barY = y+1.8, barH = 4;
+      const barY = y+2.2, barH = 3.6;
       pdf.setFillColor(238,239,242);
       pdf.roundedRect(marginL, barY, barW, barH, 1, 1, "F");
       const rgb = hexToRgbArr(x.emp.color);
@@ -2467,9 +2501,9 @@ function buildMonthOverviewPdf(filenameBase){
         + (x.vacationMin?" - "+minutesToHM(x.vacationMin)+" godisnji":"")
         + (x.overMin ? " - "+minutesToHM(x.overMin)+" preko" : (x.freeMin?" - "+minutesToHM(x.freeMin)+" slobodno":""));
       pdf.setFont("helvetica","normal"); pdf.setFontSize(7); pdf.setTextColor(130,130,130);
-      pdf.text(pdfSafe(subtext), marginL, y+6.5);
+      pdf.text(pdfSafe(subtext), marginL, y+9);
       pdf.setTextColor(30,30,30);
-      y += 11.5;
+      y += 14;
     });
   }
 
@@ -3358,7 +3392,7 @@ function renderMonthOverviewModal(){
   </div>`;
 }
 
-const BUILD_ID = "2026-09-01 14:10 UTC";
+const BUILD_ID = "2026-09-01 16:50 UTC";
 console.log("Raspored build:", BUILD_ID);
 document.addEventListener("DOMContentLoaded", ()=>{
   const tag = document.createElement("div");
@@ -3367,21 +3401,6 @@ document.addEventListener("DOMContentLoaded", ()=>{
   document.body.appendChild(tag);
 });
 boot();
-
-/* ---- automatsko azuriranje - radi SAMO unutar desktop (Tauri) app-a, na webu se tiho preskace ---- */
-if(window.__TAURI__ && window.__TAURI__.updater){
-  (async ()=>{
-    try{
-      const update = await window.__TAURI__.updater.check();
-      if(update){
-        showToast("Dostupna je novija verzija ("+update.version+") — preuzimam...");
-        await update.downloadAndInstall();
-        showToast("Azurirano! Ponovno pokrecem aplikaciju...");
-        await window.__TAURI__.process.relaunch();
-      }
-    }catch(e){ console.error("Provjera azuriranja nije uspjela:", e); }
-  })();
-}
 </script>
 </body>
 </html>

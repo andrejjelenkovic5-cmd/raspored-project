@@ -7,13 +7,16 @@ on:
     paths:
       - "desktop/**"
 
+permissions:
+  contents: write
+
 jobs:
   build:
     strategy:
       fail-fast: false
       matrix:
         include:
-          - platform: macos-latest
+          - platform: macos-15
             label: macos
           - platform: windows-latest
             label: windows
