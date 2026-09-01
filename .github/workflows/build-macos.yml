@@ -1,0 +1,46 @@
+name: Build macOS App (desktop/)
+
+# Pokreni rucno s GitHub web sucelja (tab "Actions" -> ovaj workflow -> "Run workflow"),
+# ili automatski pri svakom pushu na main granu koji dira desktop/ folder.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "desktop/**"
+
+jobs:
+  build-macos:
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: desktop
+    steps:
+      - name: Preuzmi kod
+        uses: actions/checkout@v4
+
+      - name: Postavi Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Postavi Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Instaliraj npm ovisnosti
+        run: npm install
+
+      - name: Izgradi macOS aplikaciju
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: desktop
+
+      - name: Prilozi gotovu app kao download
+        uses: actions/upload-artifact@v4
+        with:
+          name: raspored-desktop-macos
+          path: |
+            desktop/src-tauri/target/release/bundle/dmg/*.dmg
+            desktop/src-tauri/target/release/bundle/macos/*.app

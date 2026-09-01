@@ -1,0 +1,3251 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Raspored — Dizajn tim</title>
+<meta name="description" content="Aplikacija za vođenje rasporeda dizajn tima">
+<meta name="theme-color" content="#3454D1">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root{
+  color-scheme:light;
+  --bg:#F5F6F8; --surface:#FFFFFF; --surface-2:#FBFBFC;
+  --border:#E3E6EB; --border-strong:#CBD0D9;
+  --text:#424242; --text-2:#6B7280; --text-3:#9AA1AE;
+  --accent:#00A03B; --accent-dim:#E4F5EA; --accent-ink:#00822F;
+  --teal:#3C7E79; --amber:#D97706; --amber-dim:#FDF1DE; --red:#DC4C4C;
+  --radius:10px; --radius-lg:14px;
+  --shadow:0 1px 2px rgba(20,24,38,.04), 0 4px 14px rgba(20,24,38,.06);
+  --shadow-lg:0 10px 40px rgba(20,24,38,.16);
+  --muted-bg:#F1F2F5;
+  --row-bg-a:#FFFFFF; --row-bg-b:#F7F8FA;
+  --row-today-a:#EAF7EE; --row-today-b:#E1F2E6;
+  --row-muted-a:#F1F2F5; --row-muted-b:#ECEDF0;
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#15171A; --surface:#1D2024; --surface-2:#24272C;
+  --border:#33363C; --border-strong:#474B52;
+  --text:#E7E8EA; --text-2:#A2A8B0; --text-3:#71767E;
+  --accent:#22C55E; --accent-dim:rgba(34,197,94,.16); --accent-ink:#4ADE80;
+  --teal:#5FB0A9; --amber:#F0A83D; --amber-dim:rgba(240,168,61,.16); --red:#F17272;
+  --shadow:0 1px 2px rgba(0,0,0,.35), 0 4px 14px rgba(0,0,0,.4);
+  --shadow-lg:0 10px 40px rgba(0,0,0,.55);
+  --muted-bg:#202226;
+  --row-bg-a:#1D2024; --row-bg-b:#212427;
+  --row-today-a:#173321; --row-today-b:#142E1E;
+  --row-muted-a:#202226; --row-muted-b:#1B1D21;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Manrope',system-ui,sans-serif;font-size:14px;line-height:1.4;-webkit-font-smoothing:antialiased;}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace;}
+#app{max-width:1500px;margin:0 auto;padding:20px 24px 60px;}
+button{font-family:inherit;cursor:pointer;}
+input,select,textarea{font-family:inherit;font-size:14px;}
+
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:12px;}
+.brand{display:flex;align-items:center;gap:10px;}
+.brand .mark{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--accent),#AFCB37);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:15px;box-shadow:0 3px 10px rgba(0,160,59,.35);}
+.brand h1{font-size:17px;font-weight:800;margin:0;letter-spacing:-.2px;}
+.brand .sub{font-size:12px;color:var(--text-2);margin-top:1px;}
+.topbar-actions{display:flex;gap:8px;}
+
+.btn{border:1px solid var(--border-strong);background:var(--surface);color:var(--text);padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:6px;transition:.15s;}
+.btn:hover{border-color:var(--accent);color:var(--accent);}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+.btn-primary:hover{background:var(--accent-ink);border-color:var(--accent-ink);color:#fff;}
+.btn-ghost{border-color:transparent;background:transparent;}
+.btn-ghost:hover{background:var(--surface-2);border-color:var(--border);}
+.btn-sm{padding:5px 10px;font-size:12px;}
+.btn-icon{width:32px;height:32px;padding:0;justify-content:center;border-radius:8px;}
+.btn-danger{color:var(--red);}
+.btn-danger:hover{border-color:var(--red);color:var(--red);background:#FDEDED;}
+
+.controls-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:12px;}
+.seg{display:inline-flex;background:var(--surface);border:1px solid var(--border-strong);border-radius:9px;padding:3px;gap:2px;}
+.seg button{border:none;background:transparent;padding:6px 13px;border-radius:6px;font-size:12.5px;font-weight:700;color:var(--text-2);}
+.seg button.active{background:var(--accent);color:#fff;}
+.nav-cluster{display:flex;align-items:center;gap:6px;}
+.range-label{font-size:14px;font-weight:800;min-width:190px;text-align:center;}
+.month-plus-row{display:flex;align-items:center;gap:6px;}
+.tab-more{position:relative;}
+.more-dropdown{position:absolute;top:38px;right:0;background:var(--surface);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow-lg);padding:6px;min-width:170px;z-index:50;max-height:280px;overflow-y:auto;}
+.more-dropdown .opt{padding:8px 10px;border-radius:6px;font-size:13px;font-weight:600;color:var(--text);}
+.more-dropdown .opt:hover{background:var(--accent-dim);color:var(--accent-ink);}
+
+.filter-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;}
+.emp-filter-dd{position:relative;}
+.emp-filter-panel{position:absolute;top:38px;left:0;background:var(--surface);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow-lg);padding:8px;min-width:220px;z-index:50;max-height:320px;overflow-y:auto;}
+.initials-popover{position:absolute;top:38px;right:0;background:var(--surface);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow-lg);padding:10px;min-width:180px;z-index:50;}
+.initials-popover input{width:100%;box-sizing:border-box;padding:7px 9px;border:1px solid var(--border-strong);border-radius:7px;font-size:13px;}
+.emp-filter-actions{display:flex;gap:6px;margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.emp-filter-actions button{flex:1;border:1px solid var(--border-strong);background:var(--surface-2);border-radius:6px;padding:5px;font-size:11px;font-weight:700;color:var(--text-2);}
+.emp-filter-actions button:hover{border-color:var(--accent);color:var(--accent);}
+.emp-filter-item{display:flex;align-items:center;gap:7px;padding:6px 6px;border-radius:6px;font-size:12.5px;font-weight:600;cursor:pointer;}
+.emp-filter-item:hover{background:var(--accent-dim);}
+.emp-filter-item input{width:auto;}
+.emp-filter-item .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+
+.dayview-scroll{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow);overflow-x:auto;overflow-y:auto;max-height:80vh;}
+.dayview-grid{display:flex;min-width:600px;}
+.time-col{width:56px;flex-shrink:0;border-right:1px solid var(--border);position:sticky;left:0;z-index:20;background:var(--surface);}
+.time-col .col-head{height:52px;border-bottom:1px solid var(--border);position:sticky;top:0;left:0;z-index:26;background:var(--surface-2);}
+.time-slot-label-abs{position:absolute;right:0;width:56px;text-align:right;padding-right:8px;font-size:10.5px;color:var(--text-3);font-weight:600;transform:translateY(-50%);background:var(--surface);box-sizing:border-box;}
+.time-slot-label-abs.time-slot-end{color:var(--text-2);}
+.emp-col{flex:1;min-width:210px;border-right:1px solid var(--border);position:relative;}
+.emp-col:last-child{border-right:none;}
+.col-head{height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-bottom:1px solid var(--border);gap:2px;padding:6px;background:var(--surface-2);position:sticky;top:0;z-index:25;}
+.col-head .name-row{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;}
+.col-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.col-head .ispis-btn{font-size:10px;padding:2px 8px;}
+.emp-track{position:relative;}
+.emp-track.weekend{background-color:var(--muted-bg);}
+.drop-ghost{position:absolute;left:3px;right:3px;border:2px dashed var(--accent);background:var(--accent-dim);border-radius:7px;pointer-events:none;z-index:12;opacity:.9;}
+.drop-ghost.copy-mode{border-color:#0066CC;background:#E4EFFF;}
+.drop-ghost.copy-mode::after{content:"+";position:absolute;top:-11px;right:-9px;width:20px;height:20px;border-radius:50%;background:#0066CC;color:#fff;font-size:14px;font-weight:900;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.25);}
+.drop-ghost-mini{left:2px;right:2px;border-width:1.5px;border-radius:4px;}
+.slot-hit{position:absolute;left:0;right:0;height:40px;}
+.lunch-band{position:absolute;left:0;right:0;z-index:1;pointer-events:none;background:repeating-linear-gradient(45deg, rgba(154,161,174,.10), rgba(154,161,174,.10) 7px, transparent 7px, transparent 14px);border-top:1px dashed var(--border-strong);border-bottom:1px dashed var(--border-strong);display:flex;align-items:center;justify-content:center;}
+.lunch-band .lunch-label{font-size:10.5px;font-weight:700;color:var(--text-3);background:var(--surface);padding:1px 7px;border-radius:20px;border:1px solid var(--border);}
+.item-block{position:absolute;left:3px;right:3px;border-radius:8px;padding:7px 9px;overflow:hidden;cursor:grab;border:1px solid rgba(0,0,0,.06);box-shadow:0 1px 3px rgba(20,24,38,.08);transition:box-shadow .12s;user-select:none;z-index:3;}
+.item-block.has-hover-popup{overflow:visible;}
+.item-block:hover{box-shadow:0 8px 20px rgba(20,24,38,.25);z-index:4;}
+.item-block.dragging{opacity:.85;z-index:20;box-shadow:var(--shadow-lg);cursor:grabbing;}
+.item-block .it-title{font-size:10.5px;font-weight:800;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;align-items:flex-start;gap:3px;}
+.it-titletime{font-weight:600;opacity:.85;font-size:9.5px;}
+.it-flags{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px;}
+.it-sub{font-size:10.5px;opacity:.95;font-weight:700;margin-top:1px;}
+.it-dates{font-size:9px;opacity:.9;margin-top:1px;font-weight:700;}
+.flag{display:inline-flex;align-items:center;gap:3px;font-size:9.5px;font-weight:800;padding:2px 6px;border-radius:20px;background:rgba(255,255,255,.45);color:inherit;text-decoration:none;line-height:1.4;}
+.flag-link{background:rgba(255,255,255,.62);text-decoration:none;border:1px solid rgba(255,255,255,.7);}
+.flag-link:hover{background:rgba(255,255,255,.9);}
+.item-block .note-flag, .item-block .link-flag, .mchip .note-flag, .mchip .link-flag{font-size:12px;text-decoration:none;}
+.item-block .link-flag, .mchip .link-flag{cursor:pointer;}
+.item-block .it-sub{font-size:10.5px;opacity:.9;line-height:1.25;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.resize-handle{position:absolute;left:0;right:0;bottom:0;height:14px;cursor:ns-resize;display:flex;align-items:flex-end;justify-content:center;padding-bottom:2px;z-index:5;}
+.resize-handle::after{content:"";width:26px;height:3px;border-radius:3px;background:rgba(0,0,0,.22);opacity:0;transition:opacity .15s,background .15s;}
+.item-block:hover .resize-handle::after{opacity:1;}
+.resize-handle:hover::after{background:rgba(0,0,0,.4);}
+.item-del{position:absolute;top:4px;right:4px;width:17px;height:17px;border-radius:5px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.9);color:#B3261E;opacity:0;transition:opacity .12s;cursor:pointer;z-index:4;box-shadow:0 1px 3px rgba(0,0,0,.18);}
+.item-done-btn{position:absolute;top:4px;right:23px;width:17px;height:17px;border-radius:5px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.9);color:#00822F;opacity:0;transition:opacity .12s;cursor:pointer;z-index:4;box-shadow:0 1px 3px rgba(0,0,0,.18);}
+.item-block:hover .item-done-btn, .mb-block:hover .item-done-btn{opacity:1;}
+.item-done-btn:hover{background:var(--surface);}
+.item-block.is-done, .mb-block.is-done{background:var(--surface) !important; opacity:1; border-width:2px;}
+.item-block.is-done .it-title, .mb-block.is-done .mbt, .item-block.is-done .it-titletime, .mb-block.is-done .mb-time-inline{color:var(--text-3) !important; text-decoration:line-through;}
+.mb-block .item-done-btn{top:2px;right:20px;width:14px;height:14px;}
+.item-block:hover .item-del, .mb-block:hover .item-del{opacity:1;}
+.item-del:hover{background:var(--surface);}
+.mb-block .item-del{top:2px;right:2px;width:14px;height:14px;}
+.undo-redo-seg button{display:flex;align-items:center;gap:5px;padding:6px 12px;}
+.undo-redo-seg button.is-disabled{opacity:.35;}
+.undo-redo-seg button.is-disabled:hover{background:none;}
+.resize-handle:after{content:"";position:absolute;left:50%;bottom:2px;width:20px;height:2.5px;border-radius:2px;background:rgba(0,0,0,.25);transform:translateX(-50%);}
+
+.item-block.has-hover-popup{cursor:pointer;}
+.hover-popup{display:none;position:absolute;top:0;left:100%;margin-left:6px;background:var(--surface);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow-lg);padding:10px 12px;min-width:190px;max-width:250px;z-index:60;font-size:11.5px;color:var(--text);cursor:default;}
+.hover-popup::before{content:"";position:absolute;top:0;bottom:0;left:-8px;width:8px;}
+.item-block.popup-left .hover-popup, .mb-block.popup-left .hover-popup{left:auto;right:100%;margin-left:0;margin-right:6px;}
+.item-block.popup-left .hover-popup::before, .mb-block.popup-left .hover-popup::before{left:auto;right:-8px;}
+.item-block.has-hover-popup:hover, .mb-block.has-hover-popup:hover{z-index:15;}
+.item-block.has-hover-popup:hover .hover-popup, .mb-block.has-hover-popup:hover .hover-popup{display:block;}
+.hp-title{display:flex;align-items:center;gap:5px;font-weight:800;font-size:12px;margin-bottom:6px;}
+.hp-time{font-weight:600;color:var(--text-2);font-size:10.5px;}
+.hp-row{margin-bottom:5px;line-height:1.4;color:var(--text-2);}
+.hp-note{display:flex;align-items:flex-start;gap:5px;color:var(--text);}
+.hp-link{display:flex;align-items:center;gap:5px;color:var(--accent);text-decoration:underline;font-weight:700;margin-top:4px;}
+.hp-link:hover{color:var(--accent-ink);}
+.hp-link-row{display:flex;align-items:center;gap:6px;margin-top:4px;}
+.hp-link-row .hp-link{margin-top:0;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.hp-copy-btn{flex-shrink:0;display:flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:6px;border:1px solid var(--border);background:var(--surface-2);color:var(--text-2);cursor:pointer;}
+.hp-copy-btn:hover{background:var(--surface-3,#eee);color:var(--text);}
+.now-line{position:absolute;left:0;right:0;height:2px;background:var(--red);z-index:8;pointer-events:none;}
+.now-line:before{content:"";position:absolute;left:-4px;top:-3px;width:8px;height:8px;border-radius:50%;background:var(--red);}
+
+.ctx-menu{position:fixed;background:#1c1e22;border-radius:9px;padding:4px;box-shadow:0 8px 24px rgba(0,0,0,.3);z-index:100;min-width:140px;}
+.ctx-menu button{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:none;border:none;color:#fff;font-family:inherit;font-size:12.5px;font-weight:600;padding:8px 10px;border-radius:6px;cursor:pointer;}
+.ctx-menu button:hover:not(:disabled){background:rgba(255,255,255,.12);}
+.ctx-menu button:disabled{color:rgba(255,255,255,.35);cursor:default;}
+.mgrid-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow);overflow-x:auto;overflow-y:auto;max-height:80vh;padding:2px;}
+
+/* ---- OVERVIEW VIEW ---- */
+:root{ --ov-low:#8FDDAE; --ov-mid:#FFCF5C; --ov-high:#FF9F5A; --ov-over:#F4574A; --ov-vacation:#B9A3E3; }
+.ov-wrap{display:flex;height:calc(100vh - 130px);min-height:560px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow);overflow:hidden;width:100vw;position:relative;left:50%;transform:translateX(-50%);}
+.ov-sidebar{width:220px;flex-shrink:0;background:var(--surface-2);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:14px 12px;}
+.ov-sidebar h2{font-size:12px;font-weight:800;color:var(--text-2);margin:0 0 10px;padding:0 2px;}
+.ov-emp-list{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:2px;}
+.ov-emp-check{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:8px;cursor:pointer;user-select:none;}
+.ov-emp-check:hover{background:var(--surface);}
+.ov-emp-check input{width:15px;height:15px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;}
+.ov-emp-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.ov-emp-name{font-weight:600;font-size:13px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ov-sidebar-actions{display:flex;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
+.ov-sidebar-actions button{flex:1;border:1px solid var(--border-strong);background:var(--surface);color:var(--text-2);font-family:inherit;font-size:11px;font-weight:700;padding:6px;border-radius:6px;cursor:pointer;}
+.ov-sidebar-actions button:hover{background:var(--border);color:var(--text);}
+.ov-main{flex:1;display:flex;flex-direction:column;min-width:0;padding:18px 26px;}
+.ov-main-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-shrink:0;}
+.ov-month-label{font-size:15px;font-weight:800;}
+.ov-month-nav{display:flex;gap:8px;}
+.ov-month-nav button{width:28px;height:28px;border-radius:7px;border:1px solid var(--border-strong);background:var(--surface);color:var(--text-2);cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.ov-month-nav button:hover{background:var(--surface-2);}
+.ov-legend{display:flex;align-items:center;gap:12px;font-size:11px;color:var(--text-2);margin-bottom:12px;flex-shrink:0;flex-wrap:wrap;}
+.ov-legend-item{display:flex;align-items:center;gap:5px;}
+.ov-sw{width:11px;height:11px;border-radius:3px;display:inline-block;}
+.ov-board{flex:1;display:flex;flex-direction:column;min-height:0;}
+.ov-header{display:flex;flex-direction:column;gap:5px;margin-bottom:8px;flex-shrink:0;padding-left:150px;}
+.ov-wk-row{display:grid;gap:3px;}
+.ov-wk{text-align:center;font-size:10px;font-weight:800;color:var(--text-2);background:var(--surface-2);border:1px solid var(--border);border-radius:7px;padding:4px 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ov-dow-row{display:grid;gap:3px;}
+.ov-dow{text-align:center;font-size:9.5px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.3px;}
+.ov-rows{flex:1;display:flex;flex-direction:column;gap:16px;min-height:0;overflow-y:auto;}
+.ov-emp-row{flex:1;display:flex;align-items:stretch;min-height:36px;}
+.ov-label{width:150px;flex-shrink:0;display:flex;flex-direction:column;justify-content:center;padding-left:6px;border-left:3px solid transparent;}
+.ov-name{font-weight:700;font-size:13px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ov-daystrip{flex:1;display:grid;gap:3px;min-width:0;}
+.ov-cell{border-radius:7px;position:relative;overflow:hidden;border:1px solid var(--border);background:var(--surface-2);display:flex;flex-direction:column;justify-content:flex-end;}
+.ov-cell:hover{outline:2px solid var(--text);outline-offset:1px;z-index:3;}
+.ov-fill{position:absolute;left:0;right:0;bottom:0;}
+.ov-content{position:relative;z-index:1;text-align:center;padding:3px 1px 4px;}
+.ov-dnum{font-size:8.5px;font-weight:700;color:rgba(0,0,0,.35);display:block;}
+.ov-hrs{font-size:9.5px;font-weight:800;color:var(--text);display:block;line-height:1.15;white-space:nowrap;}
+.ov-warn{position:absolute;top:2px;right:2px;width:13px;height:13px;border-radius:50%;background:#D8271A;color:#fff;font-size:9px;font-weight:900;display:flex;align-items:center;justify-content:center;z-index:2;}
+.ov-cell.weekend{background:repeating-linear-gradient(135deg, #F1F2F4, #F1F2F4 4px, #E9EAED 4px, #E9EAED 8px);}
+:root[data-theme="dark"] .ov-cell.weekend{background:repeating-linear-gradient(135deg, #202226, #202226 4px, #1B1D21 4px, #1B1D21 8px);}
+.ov-cell.weekend .ov-dnum{opacity:.55;}
+.ov-cell.today{border-color:var(--accent);border-width:2px;}
+.ov-cell.vacation{background:var(--ov-vacation);}
+.ov-cell.vacation .ov-hrs, .ov-cell.vacation .ov-dnum{color:#fff;}
+.ov-fill-low{background:var(--ov-low);}
+.ov-fill-mid{background:var(--ov-mid);}
+.ov-fill-high{background:var(--ov-high);}
+.ov-fill-over{background:var(--ov-over);}
+.ov-empty-state{flex:1;display:flex;align-items:center;justify-content:center;color:var(--text-3);font-size:13px;font-weight:600;}
+.ov-tooltip{position:fixed;pointer-events:none;background:#1c1e22;color:#fff;font-size:11.5px;font-weight:600;padding:7px 11px;border-radius:8px;transform:translate(-50%,-125%);white-space:nowrap;z-index:80;display:none;box-shadow:0 4px 14px rgba(0,0,0,.25);line-height:1.5;}
+.ov-tooltip b{font-weight:800;}
+.mgrid{display:grid;min-width:640px;row-gap:9px;column-gap:0;}
+.mhead-cell{padding:10px 8px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);background:var(--surface-2);text-align:center;position:sticky;top:0;z-index:25;}
+.mhead-cell.today-col{background:#DCF3E3;box-shadow:inset 0 -2px 0 #00A03B;}
+:root[data-theme="dark"] .mhead-cell.today-col{background:#173321;box-shadow:inset 0 -2px 0 var(--accent);}
+:root[data-theme="dark"] .mhead-cell.today-col .dname, :root[data-theme="dark"] .mhead-cell.today-col .dnum{color:var(--accent-ink)!important;}
+.mhead-cell.today-col .dname, .mhead-cell.today-col .dnum{color:#00752B;}
+.mhead-cell .dname{font-size:10.5px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;}
+.mhead-cell .dnum{font-size:15px;font-weight:800;}
+.mhead-cell.muted{background:var(--muted-bg);}
+.mhead-cell .hol{font-size:9.5px;color:var(--amber);font-weight:700;}
+.mhead-corner{border-bottom:1px solid var(--border);border-right:1px solid var(--border);background:var(--surface-2);position:sticky;top:0;left:0;z-index:27;}
+.memp-label{padding:10px;border:1.5px solid var(--border-strong);border-right:none;border-radius:10px 0 0 10px;display:flex;flex-direction:column;gap:4px;justify-content:center;min-width:130px;position:sticky;left:0;z-index:5;}
+.memp-label .name-row{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;}
+.mcell{border-top:1.5px solid var(--border-strong);border-bottom:1.5px solid var(--border-strong);border-right:1px solid var(--border);position:relative;padding:0;display:flex;flex-direction:column;}
+.mcell.mcell-last{border-right:1.5px solid var(--border-strong);border-radius:0 10px 10px 0;}
+.mcell.muted{background:var(--muted-bg);}
+.fill-badge{background:var(--surface-2);color:var(--text-2);border:1px solid var(--border-strong);font-size:10px;font-weight:800;padding:1px 6px;border-radius:10px;white-space:nowrap;}
+.fill-badge.high{background:var(--amber-dim);color:var(--amber);border-color:transparent;}
+.fill-badge.over{background:var(--red);color:#fff;border-color:transparent;}
+.mcell-badge-strip{display:flex;justify-content:flex-end;padding:2px 3px 0;flex-shrink:0;}
+.mcell-badge-strip .fill-badge{font-size:9px;padding:1px 5px;}
+.mboard{position:relative;cursor:copy;}
+.mb-lunch{position:absolute;left:0;right:0;pointer-events:none;background:repeating-linear-gradient(45deg, rgba(154,161,174,.14), rgba(154,161,174,.14) 4px, transparent 4px, transparent 8px);}
+.mb-axis-label{position:absolute;left:2px;top:1px;font-size:7.5px;color:var(--text-3);font-weight:700;pointer-events:none;z-index:2;line-height:1.3;text-shadow:0 0 3px var(--surface-2),0 0 3px var(--surface-2),0 0 3px var(--surface-2);}
+.mb-axis-label.hourmark{font-size:8.5px;font-weight:800;color:var(--text-2);}
+.mb-block{position:absolute;left:2px;right:2px;border-radius:5px;border:1px solid rgba(0,0,0,.08);overflow:hidden;font-size:11.5px;font-weight:700;cursor:grab;z-index:3;}
+.mb-block.has-hover-popup{overflow:visible;}
+.mb-block:hover{z-index:5;box-shadow:0 2px 8px rgba(20,24,38,.25);}
+.mb-inner{padding:3px 6px;display:flex;flex-direction:column;gap:2px;overflow:hidden;height:100%;}
+.mbt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.25;font-size:9.5px;font-weight:800;}
+.mb-time-inline{font-weight:600;opacity:.85;font-size:8.5px;}
+.mbtime{font-size:8.5px;font-weight:700;opacity:.9;line-height:1.2;}
+.mbdates{font-size:8px;font-weight:700;opacity:.85;line-height:1.2;}
+.mb-flags{display:flex;gap:5px;margin-top:auto;}
+.mb-resize{position:absolute;left:0;right:0;bottom:0;height:8px;cursor:ns-resize;display:flex;align-items:flex-end;justify-content:center;padding-bottom:1px;z-index:5;}
+.mb-resize::after{content:"";width:16px;height:2.5px;border-radius:2px;background:rgba(0,0,0,.22);opacity:0;transition:opacity .15s,background .15s;}
+.mb-block:hover .mb-resize::after{opacity:1;}
+.mb-resize:hover::after{background:rgba(0,0,0,.4);}
+.mb-resize:after{content:"";position:absolute;left:50%;bottom:1px;width:10px;height:2px;border-radius:2px;background:rgba(0,0,0,.3);transform:translateX(-50%);}
+.mbt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+.empty-state{padding:60px 20px;text-align:center;color:var(--text-2);}
+.empty-state h3{font-size:15px;color:var(--text);margin:0 0 6px;}
+
+.overlay{position:fixed;inset:0;background:rgba(17,20,30,.45);backdrop-filter:blur(2px);display:flex;align-items:flex-start;justify-content:center;padding:6vh 16px;z-index:100;overflow-y:auto;}
+.overlay.top{z-index:150;align-items:center;}
+.modal{background:var(--surface);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);width:100%;max-width:460px;padding:22px;}
+.modal.wide{max-width:640px;}
+.modal.xwide{max-width:760px;}
+.modal.narrow{max-width:320px;}
+.modal h2{font-size:16px;margin:0 0 16px;font-weight:800;letter-spacing:-.2px;}
+.field{margin-bottom:13px;}
+.field label{display:block;font-size:12px;font-weight:700;color:var(--text-2);margin-bottom:5px;}
+.field input, .field select, .field textarea{width:100%;padding:8px 10px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text);}
+.field input:focus, .field select:focus, .field textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim);}
+.field textarea{resize:vertical;min-height:56px;}
+.date-btn{width:100%;padding:8px 10px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text);text-align:left;font-weight:600;display:flex;justify-content:space-between;align-items:center;}
+.date-btn.empty{color:var(--text-3);font-weight:500;}
+.date-btn:hover{border-color:var(--accent);}
+.field select option:disabled{color:var(--text-3);font-style:italic;}
+.lunch-hint{font-size:11px;color:var(--text-3);margin:-6px 0 12px;line-height:1.3;}
+.input-group{display:flex;}
+.input-group .input-prefix{background:var(--surface-2);border:1px solid var(--border-strong);border-right:none;border-radius:8px 0 0 8px;padding:0 4px 0 10px;font-weight:700;color:var(--text-2);display:flex;align-items:center;font-family:'JetBrains Mono',monospace;font-size:13px;white-space:nowrap;}
+.input-group input{border-radius:0 8px 8px 0 !important;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.type-picker{display:flex;gap:6px;}
+.type-opt{flex:1;padding:8px 6px;border:1px solid var(--border-strong);border-radius:8px;text-align:center;font-size:12px;font-weight:700;color:var(--text-2);}
+.type-opt.sel{border-color:var(--accent);background:var(--accent-dim);color:var(--accent-ink);}
+.modal-actions{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:8px;}
+.modal-actions .right{display:flex;gap:8px;}
+.checkbox-row{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;}
+.checkbox-row input{width:auto;}
+.errbar{background:#FDEDED;color:#A32A2A;border:1px solid #F3C6C6;padding:8px 12px;border-radius:8px;font-size:12.5px;margin-bottom:14px;font-weight:600;}
+.sound-map-list{display:flex;flex-direction:column;gap:4px;margin-top:4px;}
+.sound-map-row{display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;}
+.sound-map-initials{font-weight:800;font-size:12px;background:var(--accent-dim);color:var(--accent-ink);padding:2px 8px;border-radius:6px;flex-shrink:0;}
+.sound-map-filename{flex:1;font-size:12px;color:var(--text-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.sound-add-form{margin-top:10px;padding:10px;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;}
+.sound-add-form input[type="text"]{width:100%;box-sizing:border-box;padding:7px 9px;border:1px solid var(--border-strong);border-radius:7px;font-size:13px;}
+.sound-dropzone{border:2px dashed var(--border-strong);border-radius:8px;padding:16px 10px;text-align:center;font-size:12px;color:var(--text-2);cursor:pointer;transition:border-color .12s,background .12s;}
+.sound-dropzone:hover, .sound-dropzone.drag-over{border-color:var(--accent);background:var(--accent-dim);}
+
+.dp-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.dp-head .dp-title{font-size:13.5px;font-weight:800;}
+.dp-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+.dp-dow{font-size:9.5px;font-weight:700;color:var(--text-3);text-align:center;padding:3px 0;}
+.dp-day{aspect-ratio:1;border:none;background:transparent;border-radius:6px;font-size:12.5px;font-weight:600;color:var(--text);}
+.dp-day:hover{background:var(--accent-dim);}
+.dp-day.sel{background:var(--accent);color:#fff;font-weight:800;}
+.dp-day.today{box-shadow:inset 0 0 0 1.5px var(--accent);}
+.dp-day.empty{visibility:hidden;}
+.dp-actions{display:flex;justify-content:space-between;margin-top:10px;}
+.dup-quick{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border);}
+.dup-quick button{text-align:left;}
+.dp-day.orig{background:var(--surface-2);color:var(--text-3);text-decoration:line-through;}
+.dup-hint{font-size:11.5px;color:var(--text-2);text-align:center;margin-top:8px;}
+
+.emp-list{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
+.emp-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;}
+.emp-row input[type=text]{flex:1;border:none;background:transparent;padding:2px;font-weight:600;}
+.emp-row input[type=text]:focus{outline:none;background:var(--surface-2);border-radius:4px;}
+.color-dot-btn{width:20px;height:20px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px var(--border-strong);flex-shrink:0;}
+.color-swatches{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;position:absolute;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px;box-shadow:var(--shadow-lg);z-index:10;max-width:216px;}
+.swatch{width:22px;height:22px;border-radius:50%;border:2px solid rgba(0,0,0,.08);cursor:pointer;}
+.swatch-sel{border-color:#1c1e22;box-shadow:0 0 0 2px #fff inset;}
+.swatch.sel{border-color:var(--text);}
+.inactive-tag{font-size:10px;font-weight:700;color:var(--text-3);background:var(--surface-2);padding:2px 7px;border-radius:20px;}
+
+.report-head{margin-bottom:14px;}
+.report-head h2{margin-bottom:2px;}
+.report-sub{font-size:12.5px;color:var(--text-2);}
+table.rep{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px;}
+table.rep th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);padding:6px 4px;border-bottom:1px solid var(--border);}
+table.rep td{padding:7px 4px;border-bottom:1px solid var(--border);}
+table.rep tr.total td{font-weight:800;border-top:2px solid var(--text);border-bottom:none;padding-top:10px;}
+.rep-daily{margin-top:18px;}
+.rep-daily h4{font-size:12px;color:var(--text-2);text-transform:uppercase;letter-spacing:.05em;margin:0 0 8px;}
+
+.mo-section-title{font-size:11.5px;font-weight:800;color:var(--text-2);text-transform:uppercase;letter-spacing:.06em;margin:20px 0 8px;}
+.mo-scope-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border);}
+.mo-week-picker{display:flex;flex-wrap:wrap;gap:5px;}
+.mo-week-btn{border:1px solid var(--border-strong);background:var(--surface);border-radius:20px;padding:5px 11px;font-size:11.5px;font-weight:700;color:var(--text-2);}
+.mo-week-btn:hover{border-color:var(--accent);color:var(--accent);}
+.mo-week-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+.capacity-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
+.cap-stat{background:var(--surface-2);border-radius:10px;padding:12px 10px;text-align:center;}
+.cap-val{font-size:19px;font-weight:800;letter-spacing:-.3px;}
+.cap-val.over-text{color:var(--red);}
+.cap-lbl{font-size:10.5px;color:var(--text-2);font-weight:700;margin-top:2px;}
+.barrow-track{position:relative;}
+.barrow-over{position:absolute;top:0;right:0;height:100%;background:repeating-linear-gradient(45deg, var(--red), var(--red) 4px, #ffffff 4px, #ffffff 8px);border-radius:0 20px 20px 0;}
+.barrow-val.over{color:var(--red);}
+.cap-row{margin-bottom:1px;}
+.cap-subline{font-size:10.5px;color:var(--text-3);margin:0 0 9px 0;padding-left:2px;}
+.over-text{color:var(--red);font-weight:700;}
+.barchart{display:flex;flex-direction:column;gap:7px;}
+.barrow{display:grid;grid-template-columns:120px 1fr 90px;align-items:center;gap:8px;font-size:12px;}
+.barrow-label{display:flex;align-items:center;gap:6px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.barrow-track{background:var(--surface-2);border-radius:20px;height:10px;overflow:hidden;}
+.barrow-fill{height:100%;border-radius:20px;min-width:3px;transition:width .3s;}
+.barrow-val{font-weight:700;font-size:11.5px;white-space:nowrap;}
+.barrow-val .dim{color:var(--text-3);font-weight:600;}
+.mo-empty{color:var(--text-3);font-size:12.5px;}
+.heat-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+.heat-dow{font-size:9.5px;font-weight:700;color:var(--text-3);text-align:center;padding-bottom:2px;text-transform:uppercase;letter-spacing:.05em;}
+.heat-cell{aspect-ratio:1;border-radius:6px;padding:4px;display:flex;flex-direction:column;font-size:10px;font-weight:700;position:relative;}
+.heat-cell.empty{visibility:hidden;}
+.heat-daynum{font-size:10px;font-weight:700;opacity:.85;}
+.heat-hours{font-size:9px;font-weight:800;margin-top:auto;}
+.heat-vac{position:absolute;top:3px;right:3px;opacity:.8;}
+.mo-details{margin-top:22px;border-top:1px solid var(--border);padding-top:12px;}
+.mo-details summary{cursor:pointer;font-size:12.5px;font-weight:700;color:var(--text-2);}
+.mo-details[open] summary{margin-bottom:12px;}
+.mo-emp-detail{margin-bottom:16px;}
+.mo-emp-name{display:flex;align-items:center;gap:6px;font-weight:800;font-size:13px;margin-bottom:6px;}
+.pdf-hint{font-size:11px;color:var(--text-3);margin-top:14px;text-align:center;}
+.pdf-brandhead{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);border-bottom:2px solid var(--accent);padding-bottom:9px;margin-bottom:18px;}
+.pdf-brandfoot{font-size:9.5px;color:var(--text-3);margin-top:20px;border-top:1px solid var(--border);padding-top:8px;}
+
+@media print{
+  body *{visibility:hidden;}
+  #printArea, #printArea *{visibility:visible;}
+  #printArea{position:absolute;top:0;left:0;width:100%;padding:0;font-family:'Manrope',sans-serif;color:#1B2130;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .overlay{position:static;background:none;padding:0;}
+  .modal{box-shadow:none;max-width:none;padding:0;}
+  .modal-actions{display:none;}
+  .pdf-hint{display:none;}
+  @page{ margin:16mm 14mm; }
+
+  .report-head h2, #printArea h2{font-size:19px;margin:0 0 3px;letter-spacing:-.3px;}
+  .report-sub{color:#6B7280;font-size:11.5px;margin-bottom:16px;}
+  .mo-section-title{color:#00822F !important;font-size:10.5px;border-top:1px solid #E3E6EB;padding-top:14px;margin-top:20px !important;}
+  .mo-section-title:first-of-type{border-top:none;padding-top:0;}
+  table.rep{page-break-inside:avoid;width:100%;}
+  table.rep th{background:#F5F6F8 !important;color:#6B7280;font-size:9.5px;}
+  table.rep tr.total td{border-top:1.5px solid #1B2130;}
+  .capacity-summary{page-break-inside:avoid;}
+  .cap-stat{border:1px solid #E3E6EB;background:#FBFBFC !important;}
+  .barrow{page-break-inside:avoid;}
+  .barrow-track{background:var(--muted-bg) !important;}
+  .heat-grid{page-break-inside:avoid;}
+  .heat-cell{border:1px solid #E3E6EB;}
+  .mo-details summary{display:none;}
+  .mo-details{border-top:none;}
+  .mo-emp-detail{page-break-inside:avoid;}
+}
+
+.toast{position:fixed;bottom:20px;right:20px;background:#1B2130;color:#fff;padding:12px 16px;border-radius:10px;font-size:13px;font-weight:600;box-shadow:var(--shadow-lg);z-index:200;max-width:360px;}
+
+.pwgate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(circle at 30% 20%, rgba(0,160,59,.10), transparent 55%), radial-gradient(circle at 80% 80%, rgba(175,203,55,.14), transparent 50%), var(--bg);}
+.pwgate-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow-lg);padding:36px 30px;width:100%;max-width:340px;text-align:center;}
+.pwgate-card .mark{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,var(--accent),#AFCB37);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:19px;box-shadow:0 4px 14px rgba(0,160,59,.35);margin:0 auto 16px;}
+.pwgate-card h2{font-size:17px;margin:0 0 4px;font-weight:800;}
+.pwgate-card p{font-size:12.5px;color:var(--text-2);margin:0 0 20px;}
+.pwgate-field{text-align:left;margin-bottom:12px;}
+.pwgate-field label{display:block;font-size:11.5px;font-weight:700;color:var(--text-2);margin-bottom:5px;}
+.pwgate-card input{width:100%;padding:11px 12px;border:1px solid var(--border-strong);border-radius:9px;font-size:14px;}
+.pwgate-card input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim);}
+
+.presence-row{display:flex;align-items:center;gap:-6px;margin-right:6px;}
+.presence-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10.5px;font-weight:800;border:2px solid var(--surface);margin-left:-8px;box-shadow:0 1px 3px rgba(0,0,0,.15);}
+.presence-avatar:first-child{margin-left:0;}
+
+@media (max-width:860px){
+  #app{padding:14px;}
+  .emp-col{min-width:120px;}
+  .range-label{min-width:auto;}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+/* ---- tema (dark/light) - primjenjuje se odmah, prije ostatka aplikacije, da nema "bljeska" krive teme ---- */
+(function(){
+  try{
+    let saved = localStorage.getItem("raspored_theme_v1");
+    if(!saved) saved = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    document.documentElement.dataset.theme = saved;
+  }catch(e){}
+})();
+/* =========================================================
+   CONFIG — Supabase (schema: raspored)
+   ========================================================= */
+const SB_URL = "https://zzscfljknzezsluudyku.supabase.co";
+const SB_KEY = "sb_publishable_7kdyVE9p6Pfr-3_IbnEPvw_OfQcNmq3";
+const SB_SCHEMA = "raspored";
+const AUTH_KEY = "raspored_authed_v1";
+const INITIALS_KEY = "raspored_initials_v1";
+// Safari (posebno privatni mod, ili stroge postavke "Prevent Cross-Site Tracking") zna baciti grešku
+// pri pisanju u localStorage, ili ga tiho ograničiti. Svaki pristup je zato zaštićen try/catchem, a
+// kolačić se tretira kao ravnopravan (ne samo rezervni) izvor - Safari puno pouzdanije čuva prvostrane
+// kolačiće nego localStorage u takvim uvjetima.
+function safeLsGet(key){ try{ return localStorage.getItem(key); }catch(e){ return null; } }
+function safeLsSet(key,val){ try{ localStorage.setItem(key,val); }catch(e){} }
+function safeLsRemove(key){ try{ localStorage.removeItem(key); }catch(e){} }
+function getCookie(name){
+  try{
+    const m = document.cookie.match(new RegExp("(?:^|; )"+name+"=([^;]*)"));
+    return m ? decodeURIComponent(m[1]) : null;
+  }catch(e){ return null; }
+}
+function setCookie(name, value, days){
+  try{
+    const expires = new Date(Date.now()+days*24*60*60*1000).toUTCString();
+    const secure = location.protocol==="https:" ? "; Secure" : "";
+    document.cookie = name+"="+encodeURIComponent(value)+"; expires="+expires+"; path=/; SameSite=Lax"+secure;
+  }catch(e){}
+}
+function setPersistentAuth(initials){
+  safeLsSet(AUTH_KEY,"1");
+  safeLsSet(INITIALS_KEY, initials);
+  setCookie("raspored_auth_v1","1",365);
+  setCookie("raspored_initials_v1",initials,365);
+}
+function clearPersistentAuth(){
+  safeLsRemove(AUTH_KEY);
+  safeLsRemove(INITIALS_KEY);
+  try{ document.cookie = "raspored_auth_v1=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"; }catch(e){}
+  try{ document.cookie = "raspored_initials_v1=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"; }catch(e){}
+}
+// Provjeri OBA izvora (localStorage i kolačić) i uzmi koji god je dostupan; ako se razlikuju, međusobno
+// se "samoiscijele" tako da idući put oba izvora budu ponovno sinkronizirana.
+function getPersistentAuth(){
+  const lsInit = safeLsGet(INITIALS_KEY);
+  const cInit = getCookie("raspored_initials_v1");
+  const savedInitials = lsInit || cInit || null;
+  if(savedInitials) setPersistentAuth(savedInitials); // sinkroniziraj oba izvora
+  return { savedInitials };
+}
+
+const SLOT_MIN = 15;
+const GRID_START_MIN = 8*60, GRID_END_MIN = 17*60;
+const N_SLOTS = (GRID_END_MIN - GRID_START_MIN) / SLOT_MIN;
+const TIME_SLOTS = Array.from({length:N_SLOTS}, (_,i)=> minutesToTime(GRID_START_MIN + i*SLOT_MIN));
+const DAY_PX_PER_MIN = 46/30; // moderate row height
+const LUNCH_START_MIN = 12*60, LUNCH_END_MIN = 13*60;
+const LUNCH_TOP = (LUNCH_START_MIN-GRID_START_MIN)*DAY_PX_PER_MIN;
+const LUNCH_HEIGHT = (LUNCH_END_MIN-LUNCH_START_MIN)*DAY_PX_PER_MIN;
+const DAY_SLOT_PX = SLOT_MIN*DAY_PX_PER_MIN; // px per 15-min row in day view
+const DISPLAY_TIME_MARKS = TIME_SLOTS.filter(t=>t.endsWith(":00")||t.endsWith(":30")); // visual labels stay at 30-min, data entry stays 15-min
+
+const EMP_COLORS = ["#FFADAD","#FFD6A5","#FDFFB6","#CAFFBF","#9BF6FF","#A0C4FF","#BDB2FF","#FFC6FF","#FFB4A2","#E4C1F9","#B9FBC0","#A9DEF9","#FCF6BD","#FF99C8","#98F5E1","#8EECF5","#90DBF4","#F1C0E8","#CFBAF0","#D0F4DE"];
+function getContrastText(hex){
+  hex = (hex||"#999999").replace("#","");
+  if(hex.length!==6) return "#2A2E38";
+  const r=parseInt(hex.substr(0,2),16), g=parseInt(hex.substr(2,2),16), b=parseInt(hex.substr(4,2),16);
+  const luminance = (0.299*r + 0.587*g + 0.114*b)/255;
+  return luminance > 0.6 ? "#2A2E38" : "#fff";
+}
+const VACATION_COLOR = "#FB3449";
+const INTERNAL_DEV_COLOR = "#EAB308";
+const MONTHS_HR = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const DAYS_HR_SHORT = ["Pon","Uto","Sri","Čet","Pet","Sub","Ned"];
+const DAYS_HR_FULL = ["Ponedjeljak","Utorak","Srijeda","Četvrtak","Petak","Subota","Nedjelja"];
+const TYPE_META = { task:{label:"Task",icon:"diamond"}, internal_dev:{label:"Interni razvoj",icon:"settings"}, vacation:{label:"Godišnji odmor",icon:"sun"} };
+
+/* =========================================================
+   ICONS (line-style SVG, no emoji)
+   ========================================================= */
+const ICONS = {
+  users: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+  power: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>',
+  fileText: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>',
+  printer: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>',
+  note: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+  link: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
+  chevronLeft: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>',
+  chevronRight: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>',
+  plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+  play: '<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="6 3 20 12 6 21 6 3"/></svg>',
+  barChart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>',
+  calendar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+  sun: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="6.34" y2="6.34"/><line x1="17.66" y1="17.66" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="6.34" y2="17.66"/><line x1="17.66" y1="6.34" x2="19.07" y2="4.93"/></svg>',
+  settings: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
+  diamond: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 22 12 12 22 2 12 Z"/></svg>',
+  utensils: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>',
+  x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+  trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>',
+  copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+  undo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M3 13a9 9 0 1 0 3-7.7L3 7"/></svg>',
+  redo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7v6h-6"/><path d="M21 13a9 9 0 1 1-3-7.7L21 7"/></svg>',
+  user: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+  sun: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>',
+  moon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>',
+};
+function icon(name, size){
+  size = size || 14;
+  const svg = ICONS[name] || "";
+  return svg.replace("<svg ", `<svg width="${size}" height="${size}" style="vertical-align:-2px;flex-shrink:0;" `);
+}
+function iconLabel(name, label, size){
+  return `<span style="display:inline-flex;align-items:center;gap:5px;">${icon(name,size)}${label?`<span>${label}</span>`:""}</span>`;
+}
+
+/* =========================================================
+   HOLIDAYS (Croatia)
+   ========================================================= */
+function easterSunday(year){
+  const a=year%19,b=Math.floor(year/100),c=year%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25);
+  const g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7;
+  const m=Math.floor((a+11*h+22*l)/451),month=Math.floor((h+l-7*m+114)/31),day=((h+l-7*m+114)%31)+1;
+  return new Date(year,month-1,day);
+}
+function addDays(d,n){ const nd=new Date(d); nd.setDate(nd.getDate()+n); return nd; }
+function fmtISO(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+const holidayCache = {};
+function getHolidays(year){
+  if(holidayCache[year]) return holidayCache[year];
+  const easter = easterSunday(year); const map = {};
+  const fixed = [[0,1,"Nova godina"],[0,6,"Bogojavljenje"],[4,1,"Praznik rada"],[5,22,"Dan antifašističke borbe"],[5,25,"Dan državnosti"],[7,5,"Dan pobjede i domovinske zahvalnosti"],[7,15,"Velika Gospa"],[10,1,"Svi sveti"],[10,18,"Dan sjećanja - Vukovar"],[11,25,"Božić"],[11,26,"Sveti Stjepan"]];
+  fixed.forEach(([m,d,name])=>{ map[fmtISO(new Date(year,m,d))] = name; });
+  map[fmtISO(easter)]="Uskrs"; map[fmtISO(addDays(easter,1))]="Uskrsni ponedjeljak"; map[fmtISO(addDays(easter,60))]="Tijelovo";
+  holidayCache[year]=map; return map;
+}
+function holidayName(dateISO){ return getHolidays(parseInt(dateISO.slice(0,4)))[dateISO] || null; }
+function isWeekend(dateISO){ const wd = new Date(dateISO+"T00:00:00").getDay(); return wd===0||wd===6; }
+
+/* =========================================================
+   TIME HELPERS
+   ========================================================= */
+function timeToMinutes(t){ const [h,m]=t.split(":").map(Number); return h*60+m; }
+function minutesToTime(min){ const h=Math.floor(min/60),m=min%60; return String(h).padStart(2,"0")+":"+String(m).padStart(2,"0"); }
+function minutesToHM(min){ const h=Math.floor(min/60),m=min%60; return m===0? h+"h" : h+"h "+m+"m"; }
+function todayISO(){ return fmtISO(new Date()); }
+async function sha256hex(str){
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+
+/* =========================================================
+   API — Supabase REST (schema: raspored)
+   ========================================================= */
+async function sb(path, opts={}){
+  const headers = Object.assign({
+    "apikey": SB_KEY, "Authorization":"Bearer "+SB_KEY, "Content-Type":"application/json",
+  }, opts.headers||{});
+  if(opts.method && opts.method!=="GET") headers["Content-Profile"] = SB_SCHEMA; else headers["Accept-Profile"] = SB_SCHEMA;
+  let res;
+  try{ res = await fetch(SB_URL+"/rest/v1"+path, Object.assign({}, opts, {headers})); }
+  catch(e){ throw new Error("Mrežna greška: "+e.message); }
+  if(!res.ok){
+    let msg = res.status+" "+res.statusText;
+    try{ const j = await res.json(); if(j.message) msg = j.message; }catch(e){}
+    throw new Error(msg);
+  }
+  const txt = await res.text();
+  return txt ? JSON.parse(txt) : null;
+}
+const Employees = {
+  list: ()=> sb("/employees?select=*&order=created_at.asc"),
+  create: (d)=> sb("/employees", {method:"POST", headers:{Prefer:"return=representation"}, body:JSON.stringify(d)}),
+  update: (id,d)=> sb("/employees?id=eq."+id, {method:"PATCH", headers:{Prefer:"return=representation"}, body:JSON.stringify(d)}),
+  remove: (id)=> sb("/employees?id=eq."+id, {method:"DELETE"}),
+};
+const Months = {
+  list: ()=> sb("/months?select=*&order=year.asc,month.asc"),
+  create: (d)=> sb("/months", {method:"POST", headers:{Prefer:"return=representation"}, body:JSON.stringify(d)}),
+};
+function normalizeItemRow(row){
+  if(row && row.start_time && row.start_time.length>5) row.start_time = row.start_time.slice(0,5);
+  return row;
+}
+const MAX_UNDO = 5;
+function itemDataFields(row){
+  return { employee_id:row.employee_id, item_type:row.item_type, item_date:row.item_date, start_time:row.start_time,
+    duration_minutes:row.duration_minutes, task_number:row.task_number, task_link:row.task_link,
+    assigned_note:row.assigned_note, first_version_date:row.first_version_date, due_date:row.due_date };
+}
+/* id-alias mapping: kad se undo/redo ciklusom stavka ponovno stvori, Supabase joj dodijeli NOVI id.
+   Ovo prati "lanac" da svaki povijesni zapis uvijek zna stvarni trenutni id stavke na koju se odnosi. */
+const idAliases = {};
+function resolveId(id){ let cur=id; const seen=new Set(); while(idAliases[cur]!==undefined && !seen.has(cur)){ seen.add(cur); cur=idAliases[cur]; } return cur; }
+function setIdAlias(oldId,newId){ if(oldId!==newId) idAliases[oldId]=newId; }
+
+let currentBatch = null; // dok je aktivan, pojedinačni undo/redo zapisi se skupljaju u JEDNU logičku radnju
+function combineEntries(label, entries){
+  return { label,
+    undo: async ()=>{ for(let i=entries.length-1;i>=0;i--){ await entries[i].undo(); } },
+    redo: async ()=>{ for(let i=0;i<entries.length;i++){ await entries[i].redo(); } } };
+}
+function recordHistoryEntry(entry){
+  if(currentBatch){ currentBatch.push(entry); return; }
+  pushHistory(entry);
+}
+async function withUndoBatch(label, fn){
+  const entries = [];
+  const prevBatch = currentBatch;
+  currentBatch = entries;
+  try{ await fn(); } finally { currentBatch = prevBatch; }
+  if(entries.length===1) pushHistory(entries[0]);
+  else if(entries.length>1) pushHistory(combineEntries(label, entries));
+}
+function pushHistory(entry){
+  state.undoStack.push(entry);
+  if(state.undoStack.length > MAX_UNDO) state.undoStack.shift();
+  state.redoStack = []; // nova radnja briše "redo" granu
+}
+async function undo(){
+  if(!state.undoStack.length) return;
+  const entry = state.undoStack.pop();
+  try{
+    await entry.undo();
+    state.redoStack.push(entry);
+    if(state.redoStack.length > MAX_UNDO) state.redoStack.shift();
+    showToast("Poništeno: "+entry.label);
+  }catch(e){ showToast("Greška kod poništavanja: "+e.message); }
+  render();
+}
+async function redo(){
+  if(!state.redoStack.length) return;
+  const entry = state.redoStack.pop();
+  try{
+    await entry.redo();
+    state.undoStack.push(entry);
+    if(state.undoStack.length > MAX_UNDO) state.undoStack.shift();
+    showToast("Ponovljeno: "+entry.label);
+  }catch(e){ showToast("Greška kod ponavljanja: "+e.message); }
+  render();
+}
+const Items = {
+  listRange: async (start,end)=> {
+    const rows = await sb("/schedule_items?select=*&item_date=gte."+start+"&item_date=lte."+end+"&order=item_date.asc,start_time.asc");
+    return (rows||[]).map(normalizeItemRow);
+  },
+  create: async (d)=> {
+    const res = await sb("/schedule_items", {method:"POST", headers:{Prefer:"return=representation"}, body:JSON.stringify(d)});
+    const row = Array.isArray(res)?res[0]:res;
+    const norm = normalizeItemRow(row);
+    const originId = norm.id;
+    recordHistoryEntry({
+      label: "dodavanje",
+      undo: async ()=>{
+        const curId = resolveId(originId);
+        await sb("/schedule_items?id=eq."+curId, {method:"DELETE"});
+        state.items = state.items.filter(x=>x.id!==curId);
+      },
+      redo: async ()=>{
+        const res2 = await sb("/schedule_items", {method:"POST", headers:{Prefer:"return=representation"}, body:JSON.stringify(d)});
+        const row2 = normalizeItemRow(Array.isArray(res2)?res2[0]:res2);
+        setIdAlias(resolveId(originId), row2.id);
+        state.items.push(row2);
+      },
+    });
+    return norm;
+  },
+  update: async (id,d)=> {
+    const realId = resolveId(id);
+    const prev = state.items.find(x=>x.id===realId);
+    const prevData = prev ? itemDataFields(prev) : null;
+    const res = await sb("/schedule_items?id=eq."+realId, {method:"PATCH", headers:{Prefer:"return=representation"}, body:JSON.stringify(d)});
+    const row = Array.isArray(res)?res[0]:res;
+    const norm = normalizeItemRow(row);
+    if(prevData){
+      recordHistoryEntry({
+        label: "izmjena",
+        undo: async ()=>{
+          const curId = resolveId(realId);
+          const res2 = await sb("/schedule_items?id=eq."+curId, {method:"PATCH", headers:{Prefer:"return=representation"}, body:JSON.stringify(prevData)});
+          const row2 = normalizeItemRow(Array.isArray(res2)?res2[0]:res2);
+          const idx = state.items.findIndex(x=>x.id===curId);
+          if(idx>-1) state.items[idx] = row2;
+        },
+        redo: async ()=>{
+          const curId = resolveId(realId);
+          const res2 = await sb("/schedule_items?id=eq."+curId, {method:"PATCH", headers:{Prefer:"return=representation"}, body:JSON.stringify(d)});
+          const row2 = normalizeItemRow(Array.isArray(res2)?res2[0]:res2);
+          const idx = state.items.findIndex(x=>x.id===curId);
+          if(idx>-1) state.items[idx] = row2;
+        },
+      });
+    }
+    return norm;
+  },
+  remove: async (id)=> {
+    const realId = resolveId(id);
+    const prev = state.items.find(x=>x.id===realId);
+    await sb("/schedule_items?id=eq."+realId, {method:"DELETE"});
+    state.items = state.items.filter(x=>x.id!==realId);
+    if(prev){
+      const prevData = itemDataFields(prev);
+      const originId = realId;
+      recordHistoryEntry({
+        label: "brisanje",
+        undo: async ()=>{
+          const res2 = await sb("/schedule_items", {method:"POST", headers:{Prefer:"return=representation"}, body:JSON.stringify(prevData)});
+          const row2 = normalizeItemRow(Array.isArray(res2)?res2[0]:res2);
+          setIdAlias(resolveId(originId), row2.id);
+          state.items.push(row2);
+        },
+        redo: async ()=>{
+          const curId = resolveId(originId);
+          await sb("/schedule_items?id=eq."+curId, {method:"DELETE"});
+          state.items = state.items.filter(x=>x.id!==curId);
+        },
+      });
+    }
+  },
+};
+/* Zajednička logika pauze za ručak (12:00-13:00) - koristi je i modal za spremanje i drag/resize
+   na gridu, da se ponašanje ne razlikuje ovisno o tome kako korisnik promijeni vrijeme taska. */
+function computeLunchSplit(itemType, startTime, durationMinutes){
+  const isTaskLike = (itemType==="task" || itemType==="internal_dev");
+  const startMin = timeToMinutes(startTime);
+  const D = durationMinutes;
+  const overlapsLunch = isTaskLike && startMin < LUNCH_END_MIN && (startMin+D) > LUNCH_START_MIN;
+  if(!overlapsLunch) return null;
+  const preLunchAvailable = Math.max(0, LUNCH_START_MIN-startMin);
+  const seg1Duration = Math.min(D, preLunchAvailable);
+  let remainingDuration = D - seg1Duration;
+  // dio poslije pauze nikad ne smije prijeći kraj radnog dana (17:00) - inače task "iscuri" izvan rasporeda
+  const maxSeg2Duration = Math.max(SLOT_MIN, GRID_END_MIN - LUNCH_END_MIN);
+  const truncated = remainingDuration > maxSeg2Duration;
+  if(truncated) remainingDuration = maxSeg2Duration;
+  if(seg1Duration>0){
+    return { splitInTwo:true, truncated,
+      seg1:{ start_time:startTime, duration_minutes:seg1Duration },
+      seg2:{ start_time:minutesToTime(LUNCH_END_MIN), duration_minutes:remainingDuration } };
+  }
+  return { splitInTwo:false, truncated,
+    shifted:{ start_time:minutesToTime(LUNCH_END_MIN), duration_minutes:remainingDuration } };
+}
+// Za drag/resize/Alt-kopiju: korisnik VIDI gdje ispusta blok, pa ako taj raspon prelazi pauzu,
+// samo se izreze dio koji upada u pauzu (12-13h) - kraj OSTAJE ondje gdje je fizicki odvucen,
+// ne produzuje se dalje (za razliku od computeLunchSplit koji cuva puno trajanje).
+function computeLunchTrim(itemType, startTime, durationMinutes){
+  const isTaskLike = (itemType==="task" || itemType==="internal_dev");
+  const startMin = timeToMinutes(startTime);
+  const endMin = startMin + durationMinutes;
+  const overlapsLunch = isTaskLike && startMin < LUNCH_END_MIN && endMin > LUNCH_START_MIN;
+  if(!overlapsLunch) return null;
+  const seg1Start = startMin, seg1End = Math.min(endMin, LUNCH_START_MIN);
+  const seg2Start = Math.max(startMin, LUNCH_END_MIN), seg2End = endMin;
+  const seg1Valid = seg1End > seg1Start;
+  const seg2Valid = seg2End > seg2Start;
+  if(seg1Valid && seg2Valid){
+    return { splitInTwo:true,
+      seg1:{ start_time:startTime, duration_minutes:seg1End-seg1Start },
+      seg2:{ start_time:minutesToTime(LUNCH_END_MIN), duration_minutes:seg2End-seg2Start } };
+  }
+  if(seg1Valid){ // zavrsava tijekom/prije pauze - skraceno na kraj prije pauze
+    return { splitInTwo:false, shifted:{ start_time:startTime, duration_minutes:seg1End-seg1Start } };
+  }
+  if(seg2Valid){ // pocinje tijekom pauze - ostaje isti kraj, pocetak pomaknut na 13:00
+    return { splitInTwo:false, shifted:{ start_time:minutesToTime(LUNCH_END_MIN), duration_minutes:seg2End-seg2Start } };
+  }
+  // cijeli raspon je unutar pauze - minimalni prikaz odmah nakon pauze
+  return { splitInTwo:false, shifted:{ start_time:minutesToTime(LUNCH_END_MIN), duration_minutes:SLOT_MIN } };
+}
+// Primjenjuje promjenu na postojeću stavku (drag/resize), poštujući pauzu za ručak. Vraća true ako je
+// primijenjeno (uključujući render), false ako poziva nije trebalo (nema promjene). extraPayload su
+// polja koja se mijenjaju (npr. start_time, duration_minutes, employee_id, item_date).
+async function applyChangeWithLunchSplit(item, extraPayload){
+  const newStart = extraPayload.start_time || item.start_time;
+  const newDuration = extraPayload.duration_minutes || item.duration_minutes;
+  const split = computeLunchTrim(item.item_type, newStart, newDuration);
+  if(!split){
+    const row = await Items.update(item.id, extraPayload);
+    const idx = state.items.findIndex(x=>x.id===item.id);
+    if(idx>-1) state.items[idx] = row;
+    return;
+  }
+  if(!split.splitInTwo){
+    const payload = Object.assign({}, extraPayload, split.shifted);
+    const row = await Items.update(item.id, payload);
+    const idx = state.items.findIndex(x=>x.id===item.id);
+    if(idx>-1) state.items[idx] = row;
+    showToast("Prilagođeno pauzi za ručak (12:00–13:00).");
+    return;
+  }
+  await withUndoBatch("razdvajanje preko pauze", async ()=>{
+    const payload1 = Object.assign({}, extraPayload, split.seg1);
+    const row1 = await Items.update(item.id, payload1);
+    const idx = state.items.findIndex(x=>x.id===item.id);
+    if(idx>-1) state.items[idx] = row1;
+    const payload2 = Object.assign({}, itemDataFields(item), extraPayload, split.seg2);
+    const row2 = await Items.create(payload2);
+    state.items.push(row2);
+  });
+  showToast("Task ide preko pauze — razdvojen u dvije stavke, kraj ostaje ondje gdje je odvučeno.");
+}
+
+/* =========================================================
+   COPY / PASTE — 3 nacina: desni klik meni, hover+Ctrl+C/V, Alt+povuci
+   ========================================================= */
+
+function copyItemToClipboard(item){
+  state.taskClipboard = itemDataFields(item);
+  state.contextMenu = null;
+  showToast("Kopirano: "+(item.task_number || TYPE_META[item.item_type].label)+" — klikni desnim gumbom prazno mjesto da zalijepiš.");
+  render();
+}
+async function pasteClipboardAt(employeeId, dateISO, startTime){
+  if(!state.taskClipboard) return;
+  const base = Object.assign({}, state.taskClipboard, { employee_id: employeeId, item_date: dateISO, start_time: startTime });
+  const split = computeLunchTrim(base.item_type, base.start_time, base.duration_minutes);
+  try{
+    if(!split){
+      const row = await Items.create(base); state.items.push(row);
+    } else if(!split.splitInTwo){
+      const row = await Items.create(Object.assign({}, base, split.shifted)); state.items.push(row);
+    } else {
+      await withUndoBatch("lijepljenje preko pauze", async ()=>{
+        const row1 = await Items.create(Object.assign({}, base, split.seg1)); state.items.push(row1);
+        const row2 = await Items.create(Object.assign({}, base, split.seg2)); state.items.push(row2);
+      });
+    }
+    state.contextMenu = null;
+    refreshScheduleArea();
+    showToast("Zalijepljeno.");
+  }catch(err){ showToast("Greška kod lijepljenja: "+err.message); }
+}
+// Racuna zaposlenika/datum/vrijeme ispod dane tocke na ekranu, za dan i tjedan/3-dana prikaz.
+// Koristi se za desni klik na prazno mjesto i za hover-pracenje (Ctrl+V cilja).
+function getSlotTargetAtPoint(clientX, clientY){
+  const el = document.elementFromPoint(clientX, clientY);
+  if(!el) return null;
+  const hit = el.closest(".slot-hit");
+  if(hit) return { employeeId: hit.dataset.emp, dateISO: hit.dataset.date, startTime: hit.dataset.time };
+  const board = el.closest(".mboard");
+  if(board){
+    const rect = board.getBoundingClientRect();
+    const pad = parseInt(board.dataset.pad||"0");
+    const relY = clientY - rect.top - pad;
+    const slotPx = parseInt(board.dataset.slotpx);
+    const pxPerMin = slotPx/30;
+    let minuteOffset = Math.round((relY/pxPerMin)/SLOT_MIN)*SLOT_MIN;
+    minuteOffset = Math.max(0, Math.min(540-SLOT_MIN, minuteOffset));
+    return { employeeId: board.dataset.emp, dateISO: board.dataset.date, startTime: minutesToTime(GRID_START_MIN+minuteOffset) };
+  }
+  return null;
+}
+/* ---- zvučna obavijest pri kreiranju taska, po inicijalima trenutno prijavljenog korisnika ---- */
+const notifyAudioCache = {};
+function maybePlayCreationSound(){
+  if(!state.settings.sound_enabled) return;
+  if(!state.myInitials) return;
+  const mapping = state.settings.soundMappings ? state.settings.soundMappings[state.myInitials.toUpperCase()] : null;
+  if(!mapping) return;
+  try{
+    let audio = notifyAudioCache[state.myInitials.toUpperCase()];
+    if(!audio || audio.dataUrlUsed !== mapping.audioDataUrl){
+      audio = new Audio(mapping.audioDataUrl);
+      audio.dataUrlUsed = mapping.audioDataUrl;
+      notifyAudioCache[state.myInitials.toUpperCase()] = audio;
+    }
+    audio.currentTime = 0;
+    audio.play().catch(()=>{}); // browser može odbiti autoplay u rijetkim slučajevima - tiho ignoriramo
+  }catch(e){}
+}
+async function toggleItemDone(id){
+  const item = state.items.find(x=>x.id===id);
+  if(!item) return;
+  try{
+    const row = await Items.update(id, {is_done: !item.is_done});
+    const idx = state.items.findIndex(x=>x.id===id);
+    if(idx>-1) state.items[idx]=row;
+    refreshScheduleArea();
+  }catch(err){ showToast("Greška: "+err.message); }
+}
+async function copyToClipboard(text, btnEl){
+  if(!text) return;
+  try{
+    await navigator.clipboard.writeText(text);
+    showToast("Link kopiran.");
+    if(btnEl){ const orig=btnEl.innerHTML; btnEl.innerHTML=icon('check',11); setTimeout(()=>{ btnEl.innerHTML=orig; }, 1200); }
+  }catch(e){
+    // fallback za starije/stroze browsere gdje Clipboard API ne radi
+    try{
+      const ta=document.createElement("textarea"); ta.value=text; ta.style.position="fixed"; ta.style.opacity="0";
+      document.body.appendChild(ta); ta.select(); document.execCommand("copy"); document.body.removeChild(ta);
+      showToast("Link kopiran.");
+    }catch(e2){ showToast("Nije uspjelo kopiranje — kopiraj ručno."); }
+  }
+}
+
+/* =========================================================
+   STATE
+   ========================================================= */
+const state = {
+  employees: [], items: [],
+  currentDate: todayISO(),
+  viewMode: "week",
+  overviewStartDate: null, overviewSelectedEmpIds: null,
+  hiddenEmployeeIds: new Set(),
+  employeeFilterOpen: false,
+  employeeModalOpen: false,
+  colorPickerOpenFor: null,
+  initialsPickerOpen: false,
+  itemModal: null,
+  reportModal: null,
+  monthOverview: null,
+  datePicker: null,
+  duplicatePanel: null,
+  toast: null,
+  loading: true,
+  authed: false, authError: null, authBusy: false,
+  myInitials: null, activeSessions: [],
+  undoStack: [],
+  redoStack: [],
+  taskClipboard: null,
+  contextMenu: null,
+  settings: { row_px_day:46, row_px_3day:34, row_px_week:30, sound_enabled:true, soundMappings:{} },
+  settingsModalOpen: false, settingsUnlocked: false, settingsError: null, settingsBusy: false,
+  soundFormOpen: false, newSoundInitials: "", newSoundFile: null, soundFormBusy: false,
+  theme: "light",
+};
+
+function getVisibleDates(){
+  if(state.viewMode==="day") return [state.currentDate];
+  if(state.viewMode==="3day"){
+    const d0 = new Date(state.currentDate+"T00:00:00");
+    return [0,1,2].map(i=>fmtISO(addDays(d0,i)));
+  }
+  if(state.viewMode==="overview"){
+    if(state.overviewStartDate==null){
+      const d = new Date(state.currentDate+"T00:00:00");
+      const wd = (d.getDay()+6)%7;
+      state.overviewStartDate = fmtISO(addDays(d,-wd));
+    }
+    const start = new Date(state.overviewStartDate+"T00:00:00");
+    return Array.from({length:14},(_,i)=> fmtISO(addDays(start,i)));
+  }
+  const d = new Date(state.currentDate+"T00:00:00");
+  const wd = (d.getDay()+6)%7;
+  const monday = addDays(d,-wd);
+  return Array.from({length:7},(_,i)=>fmtISO(addDays(monday,i)));
+}
+
+async function init(){
+  state.employees = await Employees.list() || [];
+  await migratePastelColors();
+  await loadVisibleItems();
+  await loadSettings();
+}
+// Jednokratna migracija: postojeci zaposlenici imaju boje iz stare, zasicenije palete.
+// Ovo ih tiho prebacuje na novu pastelnu paletu (svakome razlicitu boju, po redu).
+async function migratePastelColors(){
+  const OLD_EMP_COLORS = ["#00A03B","#3C7E79","#005670","#AA198D","#8FB52E","#2C5F5C","#00822F","#6B1F5C"];
+  const toMigrate = state.employees.filter(e => !EMP_COLORS.includes(e.color) || OLD_EMP_COLORS.includes(e.color));
+  if(!toMigrate.length) return;
+  const usedPastels = new Set(state.employees.map(e=>e.color).filter(c=>EMP_COLORS.includes(c)));
+  let nextIdx = 0;
+  for(const emp of toMigrate){
+    let color = EMP_COLORS[nextIdx % EMP_COLORS.length];
+    let guard = 0;
+    while(usedPastels.has(color) && guard < EMP_COLORS.length){ nextIdx++; color = EMP_COLORS[nextIdx % EMP_COLORS.length]; guard++; }
+    usedPastels.add(color); nextIdx++;
+    try{ await Employees.update(emp.id, {color}); emp.color = color; }catch(e){}
+  }
+}
+async function loadSettings(){
+  try{
+    const rows = await sb("/app_config?select=key,value&key=in.(row_px_day,row_px_3day,row_px_week,sound_enabled)");
+    (rows||[]).forEach(r=>{
+      if(r.key==="sound_enabled"){ state.settings.sound_enabled = r.value==="true"; return; }
+      const n=parseInt(r.value); if(!isNaN(n)) state.settings[r.key]=n;
+    });
+    const soundRows = await sb("/sound_mappings?select=initials,audio_data_url,file_name");
+    const map = {};
+    (soundRows||[]).forEach(r=>{ map[r.initials.toUpperCase()] = { audioDataUrl:r.audio_data_url, fileName:r.file_name }; });
+    state.settings.soundMappings = map;
+    state._settingsLoaded = true;
+  }catch(e){ state._settingsLoaded = false; }
+}
+async function loadVisibleItems(force){
+  const dates = getVisibleDates();
+  const needStart = dates[0], needEnd = dates[dates.length-1];
+  const cached = state.itemsRangeStart && state.itemsRangeEnd
+    && needStart>=state.itemsRangeStart && needEnd<=state.itemsRangeEnd;
+  if(cached && !force) return; // already have this range in memory, no network needed
+  // small padding keeps queries fast while still covering quick prev/next nav without a fetch
+  const padStart = fmtISO(addDays(new Date(needStart+"T00:00:00"), -4));
+  const padEnd = fmtISO(addDays(new Date(needEnd+"T00:00:00"), 4));
+  try{
+    state.items = await Items.listRange(padStart, padEnd) || [];
+    state.itemsRangeStart = padStart;
+    state.itemsRangeEnd = padEnd;
+    state._itemsSnapshot = JSON.stringify(state.items);
+  }catch(e){
+    showToast("Greška kod dohvata rasporeda: "+e.message);
+    state.items = [];
+  }
+}
+function invalidateItemsCache(){ state.itemsRangeStart=null; state.itemsRangeEnd=null; }
+
+/* ---- live refresh: pulls in other people's changes automatically ---- */
+let liveRefreshTimer = null;
+function isUserBusy(){
+  return !!(state.itemModal || state.employeeModalOpen || state.reportModal || state.monthOverview || state.duplicatePanel || state.initialsPickerOpen || drag);
+}
+async function liveRefreshTick(){
+  if(!state.authed || isUserBusy()) return;
+  try{
+    const dates = getVisibleDates();
+    const fresh = await Items.listRange(state.itemsRangeStart||dates[0], state.itemsRangeEnd||dates[dates.length-1]);
+    const freshStr = JSON.stringify(fresh);
+    if(freshStr === state._itemsSnapshot) return; // nothing actually changed — skip re-render entirely, no flicker
+    state.items = fresh || [];
+    state._itemsSnapshot = freshStr;
+    refreshScheduleArea(); // scroll position is preserved automatically inside this
+  }catch(e){ /* silent - next tick retries */ }
+}
+function startLiveRefresh(){
+  if(liveRefreshTimer) return;
+  liveRefreshTimer = setInterval(liveRefreshTick, 6000);
+}
+function stopLiveRefresh(){ if(liveRefreshTimer){ clearInterval(liveRefreshTimer); liveRefreshTimer=null; } }
+
+function getInitialsFromUrl(){
+  try{
+    const params = new URLSearchParams(location.search);
+    const u = (params.get("u")||"").trim().toUpperCase().slice(0,4);
+    return u || null;
+  }catch(e){ return null; }
+}
+function toggleTheme(){
+  const next = document.documentElement.dataset.theme==="dark" ? "light" : "dark";
+  document.documentElement.dataset.theme = next;
+  state.theme = next;
+  try{ localStorage.setItem("raspored_theme_v1", next); }catch(e){}
+  render();
+}
+async function boot(){
+  state.theme = document.documentElement.dataset.theme || "light";
+  const urlInitials = getInitialsFromUrl();
+  const { savedInitials } = getPersistentAuth();
+  state.authed = true;
+  // URL parametar (?u=XX) je imun na čišćenje localStorage/kolačića (npr. korporativni proxy, Chrome politike)
+  // pa ima prednost ako postoji - i odmah se sinkronizira natrag u storage za slučaj da storage ipak radi.
+  state.myInitials = urlInitials || savedInitials || null;
+  if(state.myInitials){ setPersistentAuth(state.myInitials); updateUrlInitials(state.myInitials); }
+  await bootDataWithRetry();
+  state.loading = false;
+  render();
+}
+async function bootDataWithRetry(attempt){
+  attempt = attempt || 1;
+  try{
+    await init();
+    await heartbeat();
+    startPresencePolling(); startLiveRefresh();
+  }catch(e){
+    if(attempt < 3){
+      await new Promise(r=>setTimeout(r, 700*attempt));
+      return bootDataWithRetry(attempt+1);
+    }
+    showToast("Greška kod učitavanja podataka: "+e.message+" — pokušaj osvježiti stranicu.");
+  }
+}
+function updateUrlInitials(val){
+  try{
+    const url = new URL(location.href);
+    if(val) url.searchParams.set("u", val); else url.searchParams.delete("u");
+    history.replaceState(null, "", url.toString());
+  }catch(e){}
+}
+function saveMyInitials(){
+  const el = document.getElementById("myInitialsInput");
+  const val = (el.value||"").trim().toUpperCase().slice(0,4);
+  if(val){
+    setPersistentAuth(val); state.myInitials = val; updateUrlInitials(val);
+    if(!presenceTimer){ heartbeat(); startPresencePolling(); }
+    showToast("Inicijali spremljeni. Spremi ovaj link kao bookmark za najpouzdanije pamćenje.");
+  }
+  state.initialsPickerOpen = false;
+  render();
+}
+function clearMyInitials(){
+  clearPersistentAuth();
+  state.myInitials = null;
+  updateUrlInitials(null);
+  state.initialsPickerOpen = false;
+  render();
+}
+
+/* ---- presence (who's online) ---- */
+let presenceTimer = null;
+async function heartbeat(){
+  if(!state.myInitials) return;
+  try{ await sb("/sessions?on_conflict=initials", {method:"POST", headers:{Prefer:"resolution=merge-duplicates"}, body:JSON.stringify({initials:state.myInitials, last_seen:new Date().toISOString()})}); }
+  catch(e){ /* silent */ }
+}
+async function refreshActiveSessions(){
+  try{
+    const cutoff = new Date(Date.now()-90*1000).toISOString();
+    const rows = await sb("/sessions?select=initials,last_seen&last_seen=gte."+cutoff);
+    state.activeSessions = rows||[];
+    renderPresenceOnly();
+  }catch(e){ /* silent */ }
+}
+function startPresencePolling(){
+  if(presenceTimer) return;
+  refreshActiveSessions();
+  presenceTimer = setInterval(()=>{ heartbeat(); refreshActiveSessions(); }, 30000);
+}
+function stopPresencePolling(){ if(presenceTimer){ clearInterval(presenceTimer); presenceTimer=null; } }
+function initialsForEmployee(emp){
+  const parts = emp.name.trim().split(/\s+/);
+  return (parts.length>1 ? parts[0][0]+parts[parts.length-1][0] : parts[0].slice(0,2)).toUpperCase();
+}
+function colorForInitials(initials){
+  const match = state.employees.find(e=>initialsForEmployee(e)===initials);
+  if(match) return match.color;
+  let hash=0; for(const c of initials) hash = c.charCodeAt(0)+((hash<<5)-hash);
+  const palette = ["#6B7280","#8FB52E","#2C5F5C","#B45309","#6B1F5C"];
+  return palette[Math.abs(hash)%palette.length];
+}
+function renderPresenceOnly(){
+  const el = document.getElementById("presenceRow");
+  if(el) el.outerHTML = renderPresenceRow();
+}
+function renderPresenceRow(){
+  const list = state.activeSessions||[];
+  if(!list.length) return `<div class="presence-row" id="presenceRow"></div>`;
+  return `<div class="presence-row" id="presenceRow">
+    ${list.map(s=>`<div class="presence-avatar" style="background:${colorForInitials(s.initials)}" title="${escapeHtml(s.initials)} — aktivno">${escapeHtml(s.initials)}</div>`).join("")}
+  </div>`;
+}
+
+function showToast(msg){
+  state.toast = msg; render();
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(()=>{ state.toast=null; render(); }, 4500);
+}
+
+/* =========================================================
+   RENDER ROOT
+   ========================================================= */
+function renderScheduleArea(){
+  return `<div id="scheduleArea">
+    ${renderControlsRow()}
+    ${state.viewMode==="day" ? renderDayView() : state.viewMode==="overview" ? renderOverviewView() : renderMultiDayView()}
+  </div>`;
+}
+function captureScroll(){
+  const el = document.querySelector(".mgrid-wrap") || document.querySelector(".dayview-scroll");
+  return { top: el?el.scrollTop:0, left: el?el.scrollLeft:0, winY: window.scrollY };
+}
+function restoreScroll(snap){
+  const el = document.querySelector(".mgrid-wrap") || document.querySelector(".dayview-scroll");
+  if(el){ el.scrollTop = snap.top; el.scrollLeft = snap.left; }
+  window.scrollTo(0, snap.winY);
+}
+function render(){
+  const app = document.getElementById("app");
+  if(state.loading){ app.innerHTML = `<div class="empty-state"><h3>Učitavanje…</h3></div>`; return; }
+
+  const snap = captureScroll();
+  app.innerHTML = `
+    ${renderTopbar()}
+    ${renderScheduleArea()}
+    ${state.employeeModalOpen ? renderEmployeeModal() : ""}
+    ${state.itemModal ? renderItemModal() : ""}
+    ${state.itemModal && state.datePicker ? renderDatePickerPopup() : ""}
+    ${state.itemModal && state.duplicatePanel ? renderDuplicatePanel() : ""}
+    ${state.reportModal ? renderReportModal() : ""}
+    ${state.monthOverview ? renderMonthOverviewModal() : ""}
+    ${state.settingsModalOpen ? renderSettingsModal() : ""}
+    ${state.toast ? `<div class="toast">${escapeHtml(state.toast)}</div>` : ""}
+    ${renderContextMenu()}
+  `;
+  bindEvents();
+  restoreScroll(snap);
+}
+function escapeHtml(s){ return (s==null?"":String(s)).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+/* =========================================================
+   TOPBAR + CONTROLS + FILTER
+   ========================================================= */
+function renderContextMenu(){
+  const cm = state.contextMenu;
+  if(!cm) return "";
+  const items = cm.mode==="task"
+    ? `<button data-act="ctx-copy">${icon('copy',12)} Kopiraj</button>`
+    : `<button data-act="ctx-paste" ${!state.taskClipboard?"disabled":""}>${icon('copy',12)} Zalijepi</button>`;
+  return `<div class="ctx-menu" style="left:${cm.x}px;top:${cm.y}px;" data-stop="1">${items}</div>`;
+}
+function renderTopbar(){
+  return `<div class="topbar">
+    <div class="brand">
+      <div class="mark">DT</div>
+      <div><h1>Raspored — Dizajn tim</h1><div class="sub">${state.employees.filter(e=>e.active).length} aktivnih zaposlenika</div></div>
+    </div>
+    <div class="topbar-actions">
+      ${renderPresenceRow()}
+      <button class="btn" data-act="open-employees">${icon('users')} Zaposlenici</button>
+      <button class="btn btn-ghost" data-act="toggle-theme" title="${state.theme==='dark'?'Prebaci na svijetlu temu':'Prebaci na tamnu temu'}">${icon(state.theme==='dark'?'sun':'moon',16)}</button>
+      <button class="btn btn-ghost" data-act="open-settings" title="Postavke">${icon('settings',16)}</button>
+      <div style="position:relative;">
+        <button class="btn btn-ghost" data-act="toggle-initials-picker" title="Tvoji inicijali (opcionalno - za zvučnu obavijest i prisutnost)">${state.myInitials ? escapeHtml(state.myInitials) : icon('user',15)}</button>
+        ${state.initialsPickerOpen ? `<div class="initials-popover" data-stop="1">
+          <label style="font-size:11px;color:var(--text-2);font-weight:700;">Tvoji inicijali (opcionalno)</label>
+          <input type="text" id="myInitialsInput" value="${escapeHtml(state.myInitials||'')}" maxlength="4" style="text-transform:uppercase;margin-top:6px;" placeholder="npr. AJ">
+          <p style="font-size:10px;color:var(--text-3);margin:6px 0 0;line-height:1.4;">Nakon spremanja, link u adresnoj traci će sadržavati tvoje inicijale — spremi ga kao bookmark za najpouzdanije pamćenje.</p>
+          <div style="display:flex;gap:6px;margin-top:8px;">
+            <button class="btn btn-ghost btn-sm" data-act="clear-initials" style="flex:1;">Ukloni</button>
+            <button class="btn btn-primary btn-sm" data-act="save-initials" style="flex:1;">Spremi</button>
+          </div>
+        </div>` : ""}
+      </div>
+    </div>
+  </div>`;
+}
+function rangeLabel(){
+  const dates = getVisibleDates();
+  const d0 = new Date(dates[0]+"T00:00:00");
+  const d1 = new Date(dates[dates.length-1]+"T00:00:00");
+  if(state.viewMode==="day"){
+    return `${DAYS_HR_FULL[(d0.getDay()+6)%7]}, ${d0.getDate()}. ${MONTHS_HR[d0.getMonth()]} ${d0.getFullYear()}.`;
+  }
+  if(d0.getMonth()===d1.getMonth()) return `${d0.getDate()}.–${d1.getDate()}. ${MONTHS_HR[d0.getMonth()]} ${d0.getFullYear()}.`;
+  return `${d0.getDate()}. ${MONTHS_HR[d0.getMonth()]} – ${d1.getDate()}. ${MONTHS_HR[d1.getMonth()]} ${d1.getFullYear()}.`;
+}
+function renderControlsRow(){
+  const activeEmps = state.employees.filter(e=>e.active);
+  const hidden = state.hiddenEmployeeIds;
+  return `<div class="controls-row">
+    <div class="seg">
+      <button class="${state.viewMode==='day'?'active':''}" data-act="set-view" data-view="day">Dan</button>
+      <button class="${state.viewMode==='3day'?'active':''}" data-act="set-view" data-view="3day">3 dana</button>
+      <button class="${state.viewMode==='week'?'active':''}" data-act="set-view" data-view="week">Tjedan</button>
+      <button class="${state.viewMode==='overview'?'active':''}" data-act="set-view" data-view="overview">Overview</button>
+    </div>
+    <div class="seg undo-redo-seg">
+      <button data-act="undo-action" title="Undo (Ctrl+Z) — ${state.undoStack.length}/${MAX_UNDO}" class="${!state.undoStack.length?'is-disabled':''}">Undo</button>
+      <button data-act="redo-action" title="Redo (Ctrl+Shift+Z) — ${state.redoStack.length}/${MAX_UNDO}" class="${!state.redoStack.length?'is-disabled':''}">Redo</button>
+    </div>
+    ${state.viewMode!=='overview' ? `<div class="nav-cluster">
+      <button class="btn btn-icon" data-act="nav-prev">${icon('chevronLeft',15)}</button>
+      <div class="range-label">${rangeLabel()}</div>
+      <button class="btn btn-icon" data-act="nav-next">${icon('chevronRight',15)}</button>
+      <button class="btn btn-sm" data-act="goto-today">Danas</button>
+    </div>
+    <div class="month-plus-row">
+      <div class="emp-filter-dd">
+        <button class="btn btn-sm" data-act="toggle-emp-filter-dd">${icon('users',13)} Zaposlenici (${activeEmps.length}) ${icon('chevronRight',11)}</button>
+        ${state.employeeFilterOpen ? `<div class="emp-filter-panel" data-stop="1">
+          <div class="emp-filter-actions">
+            <button data-act="filter-select-all">Odaberi sve</button>
+            <button data-act="filter-select-none">Ukloni sve</button>
+          </div>
+          ${activeEmps.map(e=>`<label class="emp-filter-item">
+            <input type="checkbox" data-act="toggle-emp-filter-cb" data-id="${e.id}" ${!hidden.has(e.id)?"checked":""}>
+            <span class="dot" style="background:${e.color}"></span>${escapeHtml(e.name)}
+          </label>`).join("")}
+        </div>` : ""}
+      </div>
+      <button class="btn btn-sm" data-act="open-month-overview">${icon('barChart')} Pregled mjeseca</button>
+    </div>` : ""}
+  </div>`;
+}
+
+/* =========================================================
+   DAY VIEW (employees as columns, precise grid)
+   ========================================================= */
+function renderDayView(){
+  const dateISO = state.currentDate;
+  const weekend = isWeekend(dateISO);
+  const activeEmps = state.employees.filter(e=>e.active && !state.hiddenEmployeeIds.has(e.id));
+  const dayItems = state.items.filter(it=>it.item_date===dateISO);
+
+  if(activeEmps.length===0){
+    return `<div class="empty-state"><h3>Nema vidljivih zaposlenika</h3><p>Dodaj zaposlenike ili isključi filter iznad.</p></div>`;
+  }
+
+  const dayPxPerMin = state.settings.row_px_day/30;
+  const gridInner = (GRID_END_MIN-GRID_START_MIN)*dayPxPerMin;
+  const PAD_TOP = 16, PAD_BOTTOM = 16;
+  const totalHeight = gridInner + PAD_TOP + PAD_BOTTOM;
+  const nowMin = (()=>{ const n=new Date(); return n.getHours()*60+n.getMinutes(); })();
+  const showNow = dateISO===todayISO() && nowMin>=GRID_START_MIN && nowMin<=GRID_END_MIN;
+  const nowTop = PAD_TOP + (nowMin-GRID_START_MIN)*dayPxPerMin;
+
+  const HEAD_H = 52;
+  const timeLabels = DISPLAY_TIME_MARKS.map(t=>`<div class="time-slot-label-abs" style="top:${HEAD_H+PAD_TOP+(timeToMinutes(t)-GRID_START_MIN)*dayPxPerMin}px">${t}</div>`).join("")
+    + `<div class="time-slot-label-abs time-slot-end" style="top:${HEAD_H+PAD_TOP+gridInner}px">17:00</div>`;
+
+  let gridStops = [`transparent ${PAD_TOP}px`];
+  DISPLAY_TIME_MARKS.forEach(t=>{
+    const y = PAD_TOP + (timeToMinutes(t)-GRID_START_MIN)*dayPxPerMin;
+    gridStops.push(`transparent ${y}px`, `var(--border) ${y}px`, `var(--border) ${y+1}px`, `transparent ${y+1}px`);
+  });
+  const gridBg = `linear-gradient(to bottom, ${gridStops.join(",")})`;
+  const daySlotPx = SLOT_MIN*dayPxPerMin;
+
+  const empCols = activeEmps.map((emp,idx)=>{
+    const items = dayItems.filter(it=>it.employee_id===emp.id).sort((a,b)=>timeToMinutes(a.start_time)-timeToMinutes(b.start_time));
+    const blocks = items.map(it=>renderItemBlock(it, dayPxPerMin, PAD_TOP, idx===activeEmps.length-1)).join("");
+    const hits = TIME_SLOTS.map((t,i)=>`<div class="slot-hit" style="top:${PAD_TOP+i*daySlotPx}px;height:${daySlotPx}px" data-act="add-item-slot" data-emp="${emp.id}" data-time="${t}" data-date="${dateISO}"></div>`).join("");
+    const lunchLabel = idx===0 ? `<span class="lunch-label">${icon('utensils',12)} Ručak</span>` : "";
+    const lunchTop = PAD_TOP+(LUNCH_START_MIN-GRID_START_MIN)*dayPxPerMin, lunchBot = PAD_TOP+(LUNCH_END_MIN-GRID_START_MIN)*dayPxPerMin;
+    return `<div class="emp-col">
+      <div class="col-head">
+        <div class="name-row"><span class="col-dot" style="background:${emp.color}"></span>${escapeHtml(emp.name)}</div>
+        <button class="btn btn-ghost ispis-btn" data-act="open-report" data-emp="${emp.id}">${icon('fileText',12)} Ispis tjedna</button>
+      </div>
+      <div class="emp-track ${weekend?"weekend":""}" style="height:${totalHeight}px;background-image:${gridBg}" data-emp="${emp.id}" data-date="${dateISO}">
+        <div class="lunch-band" style="top:${lunchTop}px;height:${lunchBot-lunchTop}px">${lunchLabel}</div>
+        ${hits}${blocks}
+        ${showNow ? `<div class="now-line" style="top:${nowTop}px"></div>` : ""}
+      </div>
+    </div>`;
+  }).join("");
+
+  return `<div class="dayview-scroll"><div class="dayview-grid">
+    <div class="time-col" style="height:${totalHeight+52}px"><div class="col-head"></div>${timeLabels}</div>
+    ${empCols}
+  </div></div>`;
+}
+function renderItemBlock(it, dayPxPerMin, padTop, isLastCol){
+  const emp = state.employees.find(e=>e.id===it.employee_id);
+  const startMin = timeToMinutes(it.start_time);
+  const endMin = startMin + it.duration_minutes;
+  const top = padTop + (startMin-GRID_START_MIN)*dayPxPerMin;
+  const height = Math.max((endMin-startMin)*dayPxPerMin - 2, 24);
+  let bg, border, color="#fff";
+  if(it.item_type==="vacation"){ bg=VACATION_COLOR; border=VACATION_COLOR; color="#3A2600"; }
+  else if(it.item_type==="internal_dev"){ bg=INTERNAL_DEV_COLOR; border=INTERNAL_DEV_COLOR; color="#4A3900"; }
+  else { bg=emp?emp.color:"#999"; border=emp?emp.color:"#999"; color=getContrastText(bg); }
+  const title = it.item_type==="task" ? (it.task_number||"Task") : TYPE_META[it.item_type].label;
+  const endTime = minutesToTime(endMin);
+  const sub = `${it.start_time.slice(0,5)}–${endTime}`;
+  const hasNote = it.assigned_note && it.assigned_note.trim();
+  const hasLink = it.task_link && it.task_link.trim();
+  const hasFV = it.first_version_date, hasDue = it.due_date;
+  const hasDates = hasFV || hasDue;
+  const hasFlags = hasNote || hasLink;
+  const datesLine = hasDates ? [hasFV?`PV: ${fmtDateShort(hasFV)}`:"", hasDue?`Rok: ${fmtDateShort(hasDue)}`:""].filter(Boolean).join(" · ") : "";
+  const showDatesInline = hasDates && it.duration_minutes>=60;
+  const titleAttr = ` title="${escapeHtml(title+" · "+sub+(datesLine?"\n"+datesLine:"")+(hasNote?"\nBilješka: "+it.assigned_note:"")+(hasLink?"\nLink: "+it.task_link:""))}"`;
+  const hasExtra = hasDates || hasFlags;
+  const delBtn = `<span class="item-del" data-act="quick-delete-item" data-id="${it.id}" title="Obriši">${icon('trash',11)}</span>`;
+  const doneBtn = `<span class="item-done-btn" data-act="toggle-done" data-id="${it.id}" title="${it.is_done?'Označi kao neodrađeno':'Označi kao odrađeno'}">${icon('check',11)}</span>`;
+  const doneCls = it.is_done ? " is-done" : "";
+
+  if(hasExtra){
+    return `<div class="item-block has-hover-popup${doneCls} ${isLastCol?'popup-left':''}" style="top:${top}px;height:${height}px;background:${bg};color:${color};border-color:${border}" data-act="edit-item" data-id="${it.id}">
+      ${delBtn}
+      ${doneBtn}
+      <div class="it-title">${icon(TYPE_META[it.item_type].icon,11)} ${escapeHtml(title)} <span class="it-titletime">– ${escapeHtml(sub)}</span></div>
+      ${showDatesInline ? `<div class="it-dates">${escapeHtml(datesLine)}</div>` : ""}
+      <div class="hover-popup" onmousedown="event.stopPropagation()" onclick="event.stopPropagation()">
+        <div class="hp-title">${icon(TYPE_META[it.item_type].icon,12)} ${escapeHtml(title)} <span class="hp-time">${escapeHtml(sub)}</span></div>
+        ${datesLine ? `<div class="hp-row">${escapeHtml(datesLine)}</div>` : ""}
+        ${hasNote ? `<div class="hp-row hp-note">${icon('note',11)} ${escapeHtml(it.assigned_note)}</div>` : ""}
+        ${hasLink ? `<div class="hp-link-row"><a class="hp-link" href="${escapeHtml(normalizeUrl(it.task_link))}" target="_blank" rel="noopener noreferrer">${icon('link',11)} Otvori link</a><button type="button" class="hp-copy-btn" onclick="event.stopPropagation(); copyToClipboard(this.dataset.link, this)" data-link="${escapeHtml(it.task_link)}" title="Kopiraj link">${icon('copy',11)}</button></div>` : ""}
+      </div>
+      <div class="resize-handle" data-act="resize-handle" data-id="${it.id}"></div>
+    </div>`;
+  }
+
+  return `<div class="item-block${doneCls}" style="top:${top}px;height:${height}px;background:${bg};color:${color};border-color:${border}" data-act="edit-item" data-id="${it.id}"${titleAttr}>
+    ${delBtn}
+    ${doneBtn}
+    <div class="it-title">${icon(TYPE_META[it.item_type].icon,11)} ${escapeHtml(title)} <span class="it-titletime">– ${escapeHtml(sub)}</span></div>
+    ${datesLine ? `<div class="it-dates">${escapeHtml(datesLine)}</div>` : ""}
+    ${hasFlags ? `<div class="it-flags">
+      ${hasNote ? `<span class="flag flag-note" title="Bilješka: ${escapeHtml(it.assigned_note)}">${icon('note',10)}</span>` : ""}
+      ${hasLink ? `<a href="${escapeHtml(normalizeUrl(it.task_link))}" target="_blank" rel="noopener noreferrer" class="flag flag-link" title="${escapeHtml(it.task_link)}" onclick="event.stopPropagation()">${icon('link',10)} Link</a>` : ""}
+    </div>` : ""}
+    <div class="resize-handle" data-act="resize-handle" data-id="${it.id}"></div>
+  </div>`;
+}
+function fmtDateShort(iso){
+  const d = new Date(iso+"T00:00:00");
+  return d.getDate()+"."+(d.getMonth()+1)+".";
+}
+function normalizeUrl(url){
+  if(!url) return url;
+  const t = url.trim();
+  if(!t) return t;
+  if(/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(t)) return t; // already has a scheme (http, https, mailto...)
+  return "https://" + t;
+}
+function hexA(hex,a){
+  if(!hex) hex="#999999";
+  const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+const DAILY_LIMIT_MIN = 420; // 7h
+function effectiveWorkMinutes(startTime, durationMin){
+  const start = timeToMinutes(startTime), end = start + durationMin;
+  const overlap = Math.max(0, Math.min(end, LUNCH_END_MIN) - Math.max(start, LUNCH_START_MIN));
+  return durationMin - overlap;
+}
+function employeeDayMinutes(empId, dateISO){
+  return state.items.filter(it=>it.employee_id===empId && it.item_date===dateISO && it.item_type!=="vacation")
+    .reduce((s,it)=>s+effectiveWorkMinutes(it.start_time, it.duration_minutes),0);
+}
+function employeeDayVacationMinutes(empId, dateISO){
+  return state.items.filter(it=>it.employee_id===empId && it.item_date===dateISO && it.item_type==="vacation")
+    .reduce((s,it)=>s+it.duration_minutes,0);
+}
+function employeeRangeCapacity(empId, startISO, endISO, items){
+  let availableMin=0, vacationMin=0;
+  let d = new Date(startISO+"T00:00:00");
+  const endD = new Date(endISO+"T00:00:00");
+  while(d<=endD){
+    const dISO = fmtISO(d);
+    if(!isWeekend(dISO) && !holidayName(dISO)){
+      const dayVac = items.filter(it=>it.employee_id===empId && it.item_date===dISO && it.item_type==="vacation")
+        .reduce((s,it)=>s+it.duration_minutes,0);
+      availableMin += Math.max(0, DAILY_LIMIT_MIN - dayVac);
+      vacationMin += Math.min(dayVac, DAILY_LIMIT_MIN); // vacation is measured in the same 7h/day unit as capacity — a whole-day off is exactly one day's worth (7h), never more
+    }
+    d = addDays(d,1);
+  }
+  return { availableMin, vacationMin };
+}
+function overloadBadgeHtml(empId, dateISO, size){
+  const workMin = employeeDayMinutes(empId, dateISO);
+  const vacMin = employeeDayVacationMinutes(empId, dateISO);
+  const capacity = Math.max(0, DAILY_LIMIT_MIN - vacMin);
+  if(workMin===0 && capacity===DAILY_LIMIT_MIN) return ""; // nothing booked, full capacity free — no need to clutter with "0%"
+  const pct = capacity>0 ? Math.round(workMin/capacity*100) : (workMin>0 ? 999 : 0);
+  const over = pct>100;
+  const label = pct>=999 ? "—" : pct+"%";
+  const cls = over ? "over" : (pct>=85 ? "high" : "");
+  return `<span class="fill-badge ${cls} ${size==='sm'?'sm':''}" title="Rezervirano ${minutesToHM(workMin)} od ${minutesToHM(capacity)} dostupno${vacMin?` (${minutesToHM(Math.min(vacMin,DAILY_LIMIT_MIN))} godišnji)`:""} — ${label}">${label}</span>`;
+}
+
+/* =========================================================
+   MULTI-DAY VIEW (employees as rows, dates as columns)
+   ========================================================= */
+function renderMultiDayView(){
+  const dates = getVisibleDates();
+  const activeEmps = state.employees.filter(e=>e.active && !state.hiddenEmployeeIds.has(e.id));
+  if(activeEmps.length===0){
+    return `<div class="empty-state"><h3>Nema vidljivih zaposlenika</h3><p>Dodaj zaposlenike ili isključi filter iznad.</p></div>`;
+  }
+  const slotPx = state.viewMode==="3day" ? state.settings.row_px_3day : state.settings.row_px_week; // px per 30-min row
+  const boardHeight = 18*slotPx; // 9h / 30min = 18 rows
+  const headCells = dates.map(dISO=>{
+    const d = new Date(dISO+"T00:00:00");
+    const hol = holidayName(dISO); const weekend = isWeekend(dISO);
+    const muted = hol || weekend;
+    const isToday = dISO===todayISO();
+    return `<div class="mhead-cell ${muted?"muted":""} ${isToday?"today-col":""}">
+      <div class="dname">${DAYS_HR_SHORT[(d.getDay()+6)%7]}</div>
+      <div class="dnum">${d.getDate()}.</div>
+      ${hol ? `<div class="hol">${escapeHtml(hol)}</div>` : ""}
+    </div>`;
+  }).join("");
+
+  const rows = activeEmps.map((emp,ri)=>{
+    const rowBg = ri%2===0 ? "var(--row-bg-a)" : "var(--row-bg-b)";
+    const cells = dates.map((dISO,ci)=> renderMiniBoard(emp, dISO, slotPx, boardHeight, rowBg, ci===dates.length-1, true)).join("");
+    return `<div class="memp-label" style="background:${rowBg}">
+      <div class="name-row"><span class="col-dot" style="background:${emp.color}"></span>${escapeHtml(emp.name)}</div>
+      <button class="btn btn-ghost btn-sm" data-act="open-report" data-emp="${emp.id}">${icon('fileText',12)} Ispis</button>
+    </div>${cells}`;
+  }).join("");
+
+  return `<div class="mgrid-wrap"><div class="mgrid" style="grid-template-columns:150px repeat(${dates.length},1fr)">
+    <div class="mhead-corner"></div>${headCells}
+    ${rows}
+  </div></div>`;
+}
+
+/* =========================================================
+   OVERVIEW VIEW — mjesecna popunjenost po zaposleniku (sati dostupno/rezervirano)
+   ========================================================= */
+function computeDayCapacity(empId, dateISO){
+  const vacMinRaw = employeeDayVacationMinutes(empId, dateISO);
+  const vacationMin = Math.min(vacMinRaw, DAILY_LIMIT_MIN);
+  const availableMin = Math.max(0, DAILY_LIMIT_MIN - vacationMin);
+  const bookedMin = employeeDayMinutes(empId, dateISO);
+  return { availableMin, bookedMin, vacationMin };
+}
+function computeOverviewGrid(dates){
+  const cols = []; const dateCol = {}; let idx=1;
+  for(let i=0;i<dates.length;i+=7){
+    const week = dates.slice(i,i+7);
+    week.forEach(dISO=>{ cols.push("1fr"); dateCol[dISO]=idx; idx++; });
+    if(i+7<dates.length){ cols.push("14px"); idx++; }
+  }
+  return { templateColumns: cols.join(" "), dateCol };
+}
+function renderOverviewView(){
+  const activeEmps = state.employees.filter(e=>e.active);
+  if(state.overviewSelectedEmpIds===null) state.overviewSelectedEmpIds = new Set(activeEmps.map(e=>e.id));
+  const dates = getVisibleDates(); // 14 uzastopnih ISO datuma (2 tjedna)
+  const grid = computeOverviewGrid(dates);
+  const DOW_EN = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+  const weeks = [dates.slice(0,7), dates.slice(7,14)];
+
+  const wkBoxes = weeks.map(week=>{
+    const first = new Date(week[0]+"T00:00:00"), last = new Date(week[week.length-1]+"T00:00:00");
+    const label = first.getMonth()===last.getMonth()
+      ? `${first.getDate()}.–${last.getDate()}. ${MONTHS_HR[first.getMonth()]}`
+      : `${first.getDate()}. ${MONTHS_HR[first.getMonth()]} – ${last.getDate()}. ${MONTHS_HR[last.getMonth()]}`;
+    return `<div class="ov-wk" style="grid-column:${grid.dateCol[week[0]]} / ${grid.dateCol[week[week.length-1]]+1}">${label}</div>`;
+  }).join("");
+  const dowCells = dates.map(dISO=>{
+    const isoDow = (new Date(dISO+"T00:00:00").getDay()+6)%7;
+    return `<div class="ov-dow" style="grid-column:${grid.dateCol[dISO]}">${DOW_EN[isoDow]}</div>`;
+  }).join("");
+
+  const todayISOStr = todayISO();
+  const visible = activeEmps.filter(e=>state.overviewSelectedEmpIds.has(e.id));
+
+  const rowsHtml = visible.length ? visible.map(emp=>{
+    const cells = dates.map(dISO=>{
+      const dayNum = new Date(dISO+"T00:00:00").getDate();
+      const weekend = isWeekend(dISO); const hol = holidayName(dISO);
+      const isToday = dISO===todayISOStr;
+      let cls = "ov-cell";
+      if(weekend||hol) cls += " weekend";
+      if(isToday) cls += " today";
+      let inner, tip;
+      if(weekend||hol){
+        inner = `<div class="ov-content"><span class="ov-dnum">${dayNum}</span></div>`;
+        tip = hol ? escapeHtml(hol) : "Vikend";
+      } else {
+        const cap = computeDayCapacity(emp.id, dISO);
+        const isFullVacation = cap.availableMin<=0 && cap.vacationMin>0;
+        if(isFullVacation){
+          cls += " vacation";
+          inner = `<div class="ov-content"><span class="ov-dnum">${dayNum}</span><span class="ov-hrs">GO</span></div>`;
+          tip = "Cijeli dan godišnji odmor";
+        } else {
+          const pct = cap.availableMin>0 ? (cap.bookedMin/cap.availableMin*100) : (cap.bookedMin>0?999:0);
+          const over = pct>100;
+          const remainingMin = cap.availableMin - cap.bookedMin;
+          const band = pct<=40?"ov-fill-low":pct<=75?"ov-fill-mid":pct<=100?"ov-fill-high":"ov-fill-over";
+          const fillPct = Math.min(pct,100);
+          inner = `<div class="ov-fill ${band}" style="height:${fillPct}%"></div>
+            ${over?`<div class="ov-warn">!</div>`:""}
+            <div class="ov-content"><span class="ov-dnum">${dayNum}</span><span class="ov-hrs">${remainingMin>0?minutesToHM(remainingMin):(over?"−"+minutesToHM(Math.abs(remainingMin)):"0h")}</span></div>`;
+          tip = `${minutesToHM(cap.bookedMin)} zauzeto od ${minutesToHM(cap.availableMin)} dostupno`+(cap.vacationMin>0?` (${minutesToHM(cap.vacationMin)} godišnji)`:"")+(over?" — PREPUNJENO":"");
+        }
+      }
+      return `<div class="${cls}" style="grid-column:${grid.dateCol[dISO]}" data-name="${escapeHtml(emp.name)}" data-day="${dayNum}" data-date="${dISO}" data-label="${escapeHtml(tip)}">${inner}</div>`;
+    }).join("");
+    return `<div class="ov-emp-row">
+      <div class="ov-label" style="border-left-color:${emp.color}"><div class="ov-name">${escapeHtml(emp.name)}</div></div>
+      <div class="ov-daystrip" style="grid-template-columns:${grid.templateColumns}">${cells}</div>
+    </div>`;
+  }).join("") : `<div class="ov-empty-state">Odaberi barem jednog zaposlenika sa strane.</div>`;
+
+  const d0=new Date(dates[0]+"T00:00:00"), d1=new Date(dates[dates.length-1]+"T00:00:00");
+  const rangeLabelStr = d0.getMonth()===d1.getMonth()
+    ? `${d0.getDate()}.–${d1.getDate()}. ${MONTHS_HR[d0.getMonth()]} ${d1.getFullYear()}.`
+    : `${d0.getDate()}. ${MONTHS_HR[d0.getMonth()]} – ${d1.getDate()}. ${MONTHS_HR[d1.getMonth()]} ${d1.getFullYear()}.`;
+
+  return `<div class="ov-wrap">
+    <div class="ov-sidebar">
+      <h2>ZAPOSLENICI</h2>
+      <div class="ov-emp-list">${activeEmps.map(emp=>`
+        <label class="ov-emp-check">
+          <input type="checkbox" data-act="ov-toggle-emp" data-id="${emp.id}" ${state.overviewSelectedEmpIds.has(emp.id)?"checked":""}>
+          <span class="ov-emp-dot" style="background:${emp.color}"></span>
+          <span class="ov-emp-name">${escapeHtml(emp.name)}</span>
+        </label>
+      `).join("")}</div>
+      <div class="ov-sidebar-actions">
+        <button data-act="ov-select-all">Odaberi sve</button>
+        <button data-act="ov-select-none">Poništi sve</button>
+      </div>
+    </div>
+    <div class="ov-main">
+      <div class="ov-main-head">
+        <div class="ov-month-label">${rangeLabelStr}</div>
+        <div class="ov-month-nav">
+          <button data-act="ov-prev-month">${icon('chevronLeft',14)}</button>
+          <button data-act="ov-next-month">${icon('chevronRight',14)}</button>
+        </div>
+      </div>
+      <div class="ov-legend">
+        <div class="ov-legend-item"><span class="ov-sw" style="background:var(--ov-low)"></span>Lagano</div>
+        <div class="ov-legend-item"><span class="ov-sw" style="background:var(--ov-mid)"></span>Umjereno</div>
+        <div class="ov-legend-item"><span class="ov-sw" style="background:var(--ov-high)"></span>Puno</div>
+        <div class="ov-legend-item"><span class="ov-sw" style="background:var(--ov-over)"></span>Prepunjeno (!)</div>
+        <div class="ov-legend-item"><span class="ov-sw" style="background:var(--ov-vacation)"></span>Godišnji</div>
+        <div class="ov-legend-item" style="color:var(--text-3)">Broj = preostali dostupni sati taj dan</div>
+      </div>
+      <div class="ov-board">
+        <div class="ov-header">
+          <div class="ov-wk-row" style="grid-template-columns:${grid.templateColumns}">${wkBoxes}</div>
+          <div class="ov-dow-row" style="grid-template-columns:${grid.templateColumns}">${dowCells}</div>
+        </div>
+        <div class="ov-rows">${rowsHtml}</div>
+      </div>
+    </div>
+  </div>
+  <div class="ov-tooltip" id="ovTooltip"></div>`;
+}
+
+function renderMiniBoard(emp, dISO, slotPx, boardHeight, rowBg, isLast, showAxis){
+  const hol = holidayName(dISO); const weekend = isWeekend(dISO);
+  const muted = hol || weekend;
+  const isToday = dISO===todayISO();
+  const cellBg = isToday ? (rowBg==="var(--row-bg-a)" ? "var(--row-today-a)" : "var(--row-today-b)") : muted ? (rowBg==="var(--row-bg-a)" ? "var(--row-muted-a)" : "var(--row-muted-b)") : rowBg;
+  const pxPerMin = slotPx/30;
+  const PAD = 8;
+  const cellHeight = boardHeight + PAD*2;
+  const items = state.items.filter(it=>it.employee_id===emp.id && it.item_date===dISO).sort((a,b)=>timeToMinutes(a.start_time)-timeToMinutes(b.start_time));
+  const blocks = items.map(it=>renderMiniBlock(it, emp, pxPerMin, PAD, isLast)).join("");
+  const lunchTop = PAD+(LUNCH_START_MIN-GRID_START_MIN)*pxPerMin, lunchBot = PAD+(LUNCH_END_MIN-GRID_START_MIN)*pxPerMin;
+  let gridStops = [`transparent ${PAD}px`];
+  DISPLAY_TIME_MARKS.forEach(t=>{
+    const y = PAD+(timeToMinutes(t)-GRID_START_MIN)*pxPerMin;
+    gridStops.push(`transparent ${y}px`, `var(--border) ${y}px`, `var(--border) ${y+1}px`, `transparent ${y+1}px`);
+  });
+  const gridBg = `linear-gradient(to bottom, ${gridStops.join(",")})`;
+  const axisLabels = showAxis ? DISPLAY_TIME_MARKS.map(t=>`<div class="mb-axis-label ${t.endsWith(':00')?'hourmark':''}" style="top:${PAD+(timeToMinutes(t)-GRID_START_MIN)*pxPerMin+1}px">${t}</div>`).join("") + `<div class="mb-axis-label hourmark" style="top:${PAD+boardHeight-10}px">17:00</div>` : "";
+  return `<div class="mcell ${muted?"muted":""} ${isLast?"mcell-last":""}" style="background:${cellBg}">
+    <div class="mboard ${showAxis?'has-axis':''}" style="height:${cellHeight}px;background-image:${gridBg}" data-act="add-item-board" data-emp="${emp.id}" data-date="${dISO}" data-slotpx="${slotPx}" data-pad="${PAD}">
+      <div class="mb-lunch" style="top:${lunchTop}px;height:${lunchBot-lunchTop}px"></div>
+      ${axisLabels}
+      ${blocks}
+    </div>
+  </div>`;
+}
+function renderMiniBlock(it, emp, pxPerMin, padTop, isLastCol){
+  const startMin = timeToMinutes(it.start_time);
+  const endMin = startMin + it.duration_minutes;
+  const top = (padTop||0) + (startMin-GRID_START_MIN)*pxPerMin;
+  const height = Math.max((endMin-startMin)*pxPerMin - 1, 15);
+  let bg, border, color="#fff";
+  if(it.item_type==="vacation"){ bg=VACATION_COLOR; border=VACATION_COLOR; color="#3A2600"; }
+  else if(it.item_type==="internal_dev"){ bg=INTERNAL_DEV_COLOR; border=INTERNAL_DEV_COLOR; color="#4A3900"; }
+  else { bg=emp?emp.color:"#999"; border=emp?emp.color:"#999"; color=getContrastText(bg); }
+  const title = it.item_type==="task" ? (it.task_number||"Task") : TYPE_META[it.item_type].label;
+  const endTime = minutesToTime(timeToMinutes(it.start_time)+it.duration_minutes);
+  const timeStr = it.start_time.slice(0,5)+"–"+endTime;
+  const hasNote = it.assigned_note && it.assigned_note.trim();
+  const hasLink = it.task_link && it.task_link.trim();
+  const hasFV = it.first_version_date, hasDue = it.due_date;
+  const hasDates = hasFV || hasDue;
+  const datesLine = hasDates ? [hasFV?`PV: ${fmtDateShort(hasFV)}`:"", hasDue?`Rok: ${fmtDateShort(hasDue)}`:""].filter(Boolean).join(" · ") : "";
+  let tooltip = title + " · " + timeStr;
+  if(hasFV) tooltip += "\nPrva verzija: " + fmtDateShort(hasFV);
+  if(hasDue) tooltip += "\nRok: " + fmtDateShort(hasDue);
+  if(hasNote) tooltip += "\nBilješka: " + it.assigned_note;
+  if(hasLink) tooltip += "\nLink: " + it.task_link;
+  const hasFlags = hasNote || hasLink;
+  const hasExtra = hasDates || hasFlags;
+  const showDatesInline = hasDates && it.duration_minutes>=60;
+  const delBtn = `<span class="item-del" data-act="quick-delete-item" data-id="${it.id}" title="Obriši">${icon('trash',10)}</span>`;
+  const doneBtn = `<span class="item-done-btn" data-act="toggle-done" data-id="${it.id}" title="${it.is_done?'Označi kao neodrađeno':'Označi kao odrađeno'}">${icon('check',10)}</span>`;
+  const doneCls = it.is_done ? " is-done" : "";
+
+  if(hasExtra){
+    return `<div class="mb-block has-hover-popup${doneCls} ${isLastCol?'popup-left':''}" style="top:${top}px;height:${height}px;background:${bg};color:${color};border-color:${border}" data-act="edit-item" data-id="${it.id}">
+      ${delBtn}
+      ${doneBtn}
+      <div class="mb-inner">
+        <span class="mbt">${icon(TYPE_META[it.item_type].icon,9)} ${escapeHtml(title)} <span class="mb-time-inline">– ${timeStr}</span></span>
+        ${showDatesInline ? `<span class="mbdates">${escapeHtml(datesLine)}</span>` : ""}
+      </div>
+      <div class="hover-popup" onmousedown="event.stopPropagation()" onclick="event.stopPropagation()">
+        <div class="hp-title">${icon(TYPE_META[it.item_type].icon,12)} ${escapeHtml(title)} <span class="hp-time">${timeStr}</span></div>
+        ${datesLine ? `<div class="hp-row">${escapeHtml(datesLine)}</div>` : ""}
+        ${hasNote ? `<div class="hp-row hp-note">${icon('note',11)} ${escapeHtml(it.assigned_note)}</div>` : ""}
+        ${hasLink ? `<div class="hp-link-row"><a class="hp-link" href="${escapeHtml(normalizeUrl(it.task_link))}" target="_blank" rel="noopener noreferrer">${icon('link',11)} Otvori link</a><button type="button" class="hp-copy-btn" onclick="event.stopPropagation(); copyToClipboard(this.dataset.link, this)" data-link="${escapeHtml(it.task_link)}" title="Kopiraj link">${icon('copy',11)}</button></div>` : ""}
+      </div>
+      <div class="mb-resize" data-act="mini-resize-handle" data-id="${it.id}"></div>
+    </div>`;
+  }
+
+  return `<div class="mb-block${doneCls}" style="top:${top}px;height:${height}px;background:${bg};color:${color};border-color:${border}" data-act="edit-item" data-id="${it.id}" title="${escapeHtml(tooltip)}">
+    ${delBtn}
+    ${doneBtn}
+    <div class="mb-inner">
+      <span class="mbt">${icon(TYPE_META[it.item_type].icon,9)} ${escapeHtml(title)} <span class="mb-time-inline">– ${timeStr}</span></span>
+      ${datesLine ? `<span class="mbdates">${escapeHtml(datesLine)}</span>` : ""}
+      ${hasFlags ? `<span class="mb-flags">
+        ${hasNote ? `<span class="flag flag-note">${icon('note',9)}</span>` : ""}
+        ${hasLink ? `<a href="${escapeHtml(normalizeUrl(it.task_link))}" target="_blank" rel="noopener noreferrer" class="flag flag-link" onclick="event.stopPropagation()">${icon('link',9)}</a>` : ""}
+      </span>` : ""}
+    </div>
+    <div class="mb-resize" data-act="mini-resize-handle" data-id="${it.id}"></div>
+  </div>`;
+}
+
+/* =========================================================
+   EMPLOYEE MODAL
+   ========================================================= */
+/* =========================================================
+   SETTINGS (shared, password protected — Andrej123)
+   ========================================================= */
+function openSettingsModal(){
+  state.settingsModalOpen = true;
+  state.settingsUnlocked = false;
+  state.settingsError = null;
+  render();
+}
+function closeSettingsModal(){
+  state.settingsModalOpen = false;
+  state.soundFormOpen = false; state.newSoundInitials = ""; state.newSoundFile = null;
+  render();
+}
+async function unlockSettings(){
+  const input = document.getElementById("settingsPwInput");
+  const pw = input.value;
+  if(!pw) return;
+  state.settingsBusy = true; state.settingsError = null; render();
+  try{
+    const rows = await sb("/app_config?select=value&key=eq.settings_password_hash");
+    const hash = rows && rows[0] ? rows[0].value : null;
+    const entered = await sha256hex(pw);
+    if(!hash || entered!==hash){
+      state.settingsBusy=false; state.settingsError="Neispravna lozinka."; render(); return;
+    }
+    state.settingsUnlocked = true; state.settingsBusy=false;
+    render();
+  }catch(e){ state.settingsBusy=false; state.settingsError="Greška: "+e.message; render(); }
+}
+function openSoundForm(){
+  state.soundFormOpen = true; state.newSoundInitials = ""; state.newSoundFile = null;
+  render();
+}
+function cancelSoundForm(){
+  state.soundFormOpen = false; state.newSoundInitials = ""; state.newSoundFile = null;
+  render();
+}
+function handleSoundFileSelected(file){
+  if(!file) return;
+  if(!file.type.startsWith("audio/")){ showToast("Odaberi audio fajl (mp3, wav i sl.)."); return; }
+  if(file.size > 3*1024*1024){ showToast("Fajl je prevelik (max 3MB)."); return; }
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    state.newSoundFile = { name:file.name, dataUrl:reader.result };
+    render();
+  };
+  reader.onerror = ()=> showToast("Greška kod čitanja fajla.");
+  reader.readAsDataURL(file);
+}
+async function saveSoundMapping(){
+  const initialsInput = document.getElementById("newSoundInitials");
+  const initials = (initialsInput.value||"").trim().toUpperCase().slice(0,4);
+  if(!initials){ showToast("Upiši inicijale za koje vrijedi ovaj zvuk."); return; }
+  if(!state.newSoundFile){ showToast("Odaberi ili povuci audio fajl."); return; }
+  state.soundFormBusy = true; render();
+  try{
+    await sb("/sound_mappings?on_conflict=initials", {method:"POST", headers:{Prefer:"resolution=merge-duplicates"}, body:JSON.stringify({
+      initials, audio_data_url: state.newSoundFile.dataUrl, file_name: state.newSoundFile.name, updated_at: new Date().toISOString(),
+    })});
+    state.settings.soundMappings[initials] = { audioDataUrl: state.newSoundFile.dataUrl, fileName: state.newSoundFile.name };
+    delete notifyAudioCache[initials];
+    state.soundFormOpen = false; state.newSoundInitials = ""; state.newSoundFile = null; state.soundFormBusy = false;
+    render();
+    showToast("Zvuk spremljen za "+initials+".");
+  }catch(err){ state.soundFormBusy=false; showToast("Greška: "+err.message); render(); }
+}
+async function removeSoundMapping(initials){
+  try{
+    await sb("/sound_mappings?initials=eq."+encodeURIComponent(initials), {method:"DELETE"});
+    delete state.settings.soundMappings[initials];
+    delete notifyAudioCache[initials];
+    render();
+    showToast("Zvuk uklonjen za "+initials+".");
+  }catch(err){ showToast("Greška: "+err.message); }
+}
+function previewSound(initials){
+  const m = state.settings.soundMappings[initials];
+  if(!m) return;
+  try{ new Audio(m.audioDataUrl).play().catch(()=>{}); }catch(e){}
+}
+async function saveSettings(){
+  const day = parseInt(document.getElementById("setRowDay").value)||46;
+  const day3 = parseInt(document.getElementById("setRow3day").value)||34;
+  const week = parseInt(document.getElementById("setRowWeek").value)||30;
+  const soundEnabled = document.getElementById("setSoundEnabled").checked;
+  state.settingsBusy = true; render();
+  try{
+    await sb("/app_config?on_conflict=key", {method:"POST", headers:{Prefer:"resolution=merge-duplicates"}, body:JSON.stringify({key:"row_px_day", value:String(day)})});
+    await sb("/app_config?on_conflict=key", {method:"POST", headers:{Prefer:"resolution=merge-duplicates"}, body:JSON.stringify({key:"row_px_3day", value:String(day3)})});
+    await sb("/app_config?on_conflict=key", {method:"POST", headers:{Prefer:"resolution=merge-duplicates"}, body:JSON.stringify({key:"row_px_week", value:String(week)})});
+    await sb("/app_config?on_conflict=key", {method:"POST", headers:{Prefer:"resolution=merge-duplicates"}, body:JSON.stringify({key:"sound_enabled", value:String(soundEnabled)})});
+    state.settings.row_px_day = day; state.settings.row_px_3day = day3; state.settings.row_px_week = week;
+    state.settings.sound_enabled = soundEnabled;
+    state.settingsBusy = false;
+    state.settingsModalOpen = false;
+    showToast("Postavke spremljene za sve korisnike.");
+  }catch(e){ state.settingsBusy=false; showToast("Greška kod spremanja: "+e.message); render(); }
+}
+function renderSettingsModal(){
+  return `<div class="overlay" data-act="close-settings">
+    <div class="modal" data-stop="1">
+      <h2>Postavke</h2>
+      ${!state.settingsUnlocked ? `
+        ${state.settingsError ? `<div class="errbar">${escapeHtml(state.settingsError)}</div>` : ""}
+        <p style="font-size:12.5px;color:var(--text-2);margin:0 0 12px;">Ove postavke vrijede za sve korisnike aplikacije. Upiši lozinku za postavke.</p>
+        <div class="field"><input type="password" id="settingsPwInput" placeholder="Lozinka za postavke" ${state.settingsBusy?"disabled":""}></div>
+        <div class="modal-actions"><div></div><div class="right">
+          <button class="btn" data-act="close-settings">Odustani</button>
+          <button class="btn btn-primary" data-act="unlock-settings" ${state.settingsBusy?"disabled":""}>${state.settingsBusy?"Provjera…":"Otključaj"}</button>
+        </div></div>
+      ` : `
+        <p style="font-size:12.5px;color:var(--text-2);margin:0 0 14px;">Visina jednog pola sata (u pikselima). Vrijedi odmah za sve, uključujući i one koji nisu prijavljeni.</p>
+        <div class="field"><label>Dnevni prikaz</label><input type="number" id="setRowDay" value="${state.settings.row_px_day}" min="20" max="120"></div>
+        <div class="field"><label>3-dnevni prikaz</label><input type="number" id="setRow3day" value="${state.settings.row_px_3day}" min="10" max="100"></div>
+        <div class="field"><label>Tjedni prikaz</label><input type="number" id="setRowWeek" value="${state.settings.row_px_week}" min="8" max="80"></div>
+        <div class="field" style="border-top:1px solid var(--border);padding-top:12px;margin-top:4px;">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+            <input type="checkbox" id="setSoundEnabled" ${state.settings.sound_enabled?"checked":""}> Zvučna obavijest pri dodavanju taska
+          </label>
+        </div>
+        <div class="field">
+          <label>Zvukovi po inicijalima</label>
+          <div class="sound-map-list">
+            ${Object.keys(state.settings.soundMappings||{}).length ? Object.entries(state.settings.soundMappings).map(([initials,m])=>`
+              <div class="sound-map-row">
+                <span class="sound-map-initials">${escapeHtml(initials)}</span>
+                <span class="sound-map-filename">${escapeHtml(m.fileName||"zvuk.mp3")}</span>
+                <button type="button" class="btn btn-icon btn-ghost btn-sm" data-act="preview-sound" data-initials="${escapeHtml(initials)}" title="Poslušaj">${icon('play',11)}</button>
+                <button type="button" class="btn btn-icon btn-ghost btn-sm" data-act="remove-sound-mapping" data-initials="${escapeHtml(initials)}" title="Ukloni">${icon('trash',11)}</button>
+              </div>
+            `).join("") : `<p style="font-size:12px;color:var(--text-3);margin:4px 0;">Još nema dodanih zvukova.</p>`}
+          </div>
+          ${state.soundFormOpen ? `
+            <div class="sound-add-form">
+              <input type="text" id="newSoundInitials" placeholder="Inicijali (npr. MF)" maxlength="4" style="text-transform:uppercase;margin-bottom:8px;" value="${escapeHtml(state.newSoundInitials||"")}">
+              <div class="sound-dropzone" id="soundDropzone">
+                ${state.newSoundFile ? `<span>🎵 ${escapeHtml(state.newSoundFile.name)}</span>` : `<span>Povuci audio fajl ovdje, ili klikni za odabir</span>`}
+                <input type="file" id="soundFileInput" accept="audio/*" style="display:none">
+              </div>
+              <div style="display:flex;gap:6px;margin-top:8px;">
+                <button type="button" class="btn btn-ghost btn-sm" data-act="cancel-sound-form" style="flex:1;">Odustani</button>
+                <button type="button" class="btn btn-primary btn-sm" data-act="save-sound-mapping" style="flex:1;" ${(!state.newSoundFile || state.soundFormBusy)?"disabled":""}>${state.soundFormBusy?"Spremam…":"Spremi zvuk"}</button>
+              </div>
+            </div>
+          ` : `<button type="button" class="btn btn-ghost btn-sm" data-act="open-sound-form" style="margin-top:8px;">${icon('plus',12)} Dodaj zvuk</button>`}
+        </div>
+        <div class="modal-actions"><div></div><div class="right">
+          <button class="btn" data-act="close-settings">Odustani</button>
+          <button class="btn btn-primary" data-act="save-settings" ${state.settingsBusy?"disabled":""}>${state.settingsBusy?"Spremam…":"Spremi za sve"}</button>
+        </div></div>
+      `}
+    </div>
+  </div>`;
+}
+function renderEmployeeModal(){
+  const rows = state.employees.map(emp=>`
+    <div class="emp-row" style="position:relative;">
+      <button class="color-dot-btn" style="background:${emp.color}" data-act="pick-color" data-id="${emp.id}"></button>
+      <input type="text" value="${escapeHtml(emp.name)}" data-act="rename-emp" data-id="${emp.id}">
+      ${!emp.active ? `<span class="inactive-tag">neaktivan</span>` : ""}
+      <button class="btn btn-ghost btn-sm" data-act="toggle-active-emp" data-id="${emp.id}">${emp.active?"Deaktiviraj":"Aktiviraj"}</button>
+      <button class="btn btn-ghost btn-sm btn-danger" data-act="delete-emp" data-id="${emp.id}">${icon('trash',12)} Ukloni</button>
+      ${state.colorPickerOpenFor===emp.id ? `<div class="color-swatches" data-stop="1">${EMP_COLORS.map(c=>`<div class="swatch ${emp.color===c?'swatch-sel':''}" style="background:${c}" data-act="set-color" data-id="${emp.id}" data-color="${c}"></div>`).join("")}</div>` : ""}
+    </div>
+  `).join("") || `<p style="color:var(--text-2);font-size:13px;">Još nema zaposlenika.</p>`;
+  return `<div class="overlay" data-act="close-overlay">
+    <div class="modal wide" data-stop="1">
+      <h2>Zaposlenici</h2>
+      <div class="emp-list">${rows}</div>
+      <div class="field"><label>Dodaj novog zaposlenika</label>
+        <div style="display:flex;gap:8px;"><input type="text" id="newEmpName" placeholder="Ime i prezime"><button class="btn btn-primary" data-act="add-employee">Dodaj</button></div>
+      </div>
+      <div class="modal-actions"><div></div><div class="right"><button class="btn" data-act="close-overlay">Zatvori</button></div></div>
+    </div>
+  </div>`;
+}
+
+/* =========================================================
+   ITEM MODAL (create/edit) + custom date picker
+   ========================================================= */
+function fmtDateHR(iso){
+  if(!iso) return null;
+  const d = new Date(iso+"T00:00:00");
+  return d.getDate()+". "+MONTHS_HR[d.getMonth()]+" "+d.getFullYear()+".";
+}
+function occupiedIntervals(employeeId, dateISO, excludeId, includeLunch){
+  const real = state.items.filter(it=>it.employee_id===employeeId && it.item_date===dateISO && it.id!==excludeId)
+    .map(it=>({start:timeToMinutes(it.start_time), end:timeToMinutes(it.start_time)+it.duration_minutes}));
+  if(includeLunch) real.push({start:LUNCH_START_MIN, end:LUNCH_END_MIN}); // lunch blocks START times, but not duration span
+  return real.sort((a,b)=>a.start-b.start);
+}
+function isTimeOccupied(intervals, minute){
+  return intervals.some(iv=>minute>=iv.start && minute<iv.end);
+}
+function isLunchTime(minute){ return minute>=LUNCH_START_MIN && minute<LUNCH_END_MIN; }
+function nextOccupiedStart(intervals, minute){
+  const upcoming = intervals.filter(iv=>iv.start>minute).map(iv=>iv.start);
+  return upcoming.length ? Math.min(...upcoming) : GRID_END_MIN;
+}
+function pickFirstFreeStart(intervals, preferred){
+  if(!isTimeOccupied(intervals, timeToMinutes(preferred))) return preferred;
+  for(const t of TIME_SLOTS){ if(!isTimeOccupied(intervals, timeToMinutes(t))) return t; }
+  return preferred;
+}
+function startTimeOptionsHtml(d, intervals){
+  return TIME_SLOTS.map(t=>{
+    const mins = timeToMinutes(t);
+    const occupied = t!==d.start_time && isTimeOccupied(intervals, mins);
+    const label = occupied ? (isLunchTime(mins) ? " — pauza" : " — zauzeto") : "";
+    return `<option value="${t}" ${t===d.start_time?"selected":""} ${occupied?"disabled":""}>${t}${label}</option>`;
+  }).join("");
+}
+function durationOptionsHtml(d, intervals){
+  const nextStart = nextOccupiedStart(intervals, timeToMinutes(d.start_time));
+  const maxDur = Math.min(GRID_END_MIN, nextStart) - timeToMinutes(d.start_time);
+  const all = []; for(let m=SLOT_MIN;m<=540;m+=SLOT_MIN) all.push(m);
+  const opts = all.filter(m=>m<=maxDur);
+  if(!opts.length) opts.push(SLOT_MIN);
+  if(d.duration_minutes>maxDur) d.duration_minutes = opts[opts.length-1];
+  return opts.map(m=>`<option value="${m}" ${m===d.duration_minutes?"selected":""}>${minutesToHM(m)}</option>`).join("");
+}
+function stripTevaPrefix(v){ return v ? v.replace(/^TEVA-/i,"") : ""; }
+function renderItemModal(){
+  const st = state.itemModal; const d = st.data;
+  const activeEmps = state.employees.filter(e=>e.active || e.id===d.employee_id);
+  const isEdit = st.mode==="edit";
+  const startIntervals = occupiedIntervals(d.employee_id, d.item_date, isEdit?st.id:null, true);
+  const durationIntervals = occupiedIntervals(d.employee_id, d.item_date, isEdit?st.id:null, false);
+  const wholeDayChecked = d.item_type==="vacation" && d.start_time==="08:00" && d.duration_minutes>=540;
+
+  return `<div class="overlay" data-act="close-overlay">
+    <div class="modal" data-stop="1">
+      <h2>${isEdit?"Uredi stavku":"Nova stavka"}</h2>
+      ${st.error ? `<div class="errbar">${escapeHtml(st.error)}</div>` : ""}
+      <div class="field"><label>Tip</label>
+        <div class="type-picker">
+          <div class="type-opt ${d.item_type==="task"?"sel":""}" data-act="set-type" data-type="task">${icon('diamond',12)} Task</div>
+          <div class="type-opt ${d.item_type==="internal_dev"?"sel":""}" data-act="set-type" data-type="internal_dev">${icon('settings',12)} Interni razvoj</div>
+          <div class="type-opt ${d.item_type==="vacation"?"sel":""}" data-act="set-type" data-type="vacation">${icon('sun',12)} Godišnji</div>
+        </div>
+      </div>
+      <div class="field"><label>Zaposlenik</label>
+        <select id="f_employee">${activeEmps.map(e=>`<option value="${e.id}" ${e.id===d.employee_id?"selected":""}>${escapeHtml(e.name)}</option>`).join("")}</select>
+      </div>
+      ${d.item_type==="task" ? `
+      <div class="row2">
+        <div class="field"><label>Broj taska</label>
+          <div class="input-group"><span class="input-prefix">TEVA-</span><input type="text" id="f_task_number" value="${escapeHtml(stripTevaPrefix(d.task_number))}" placeholder="broj"></div>
+        </div>
+        <div class="field"><label>Link na task</label><input type="text" id="f_task_link" value="${escapeHtml(d.task_link||"")}" placeholder="https://…"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Prva verzija (info)</label>
+          <button type="button" class="date-btn ${!d.first_version_date?'empty':''}" data-act="open-datepicker" data-field="first_version_date">${fmtDateHR(d.first_version_date) || "Odaberi datum"} ${icon('calendar',14)}</button>
+        </div>
+        <div class="field"><label>Rok (info)</label>
+          <button type="button" class="date-btn ${!d.due_date?'empty':''}" data-act="open-datepicker" data-field="due_date">${fmtDateHR(d.due_date) || "Odaberi datum"} ${icon('calendar',14)}</button>
+        </div>
+      </div>` : ""}
+      ${d.item_type==="vacation" ? `
+      <div class="field checkbox-row">
+        <input type="checkbox" id="f_whole_day" ${wholeDayChecked?"checked":""}>
+        <label style="margin:0;font-weight:600;color:var(--text)">Cijeli dan (08:00–17:00)</label>
+      </div>` : ""}
+      <div class="row2" id="timeFields" style="${d.item_type==="vacation" && wholeDayChecked ? "display:none":""}">
+        <div class="field"><label>Vrijeme početka</label>
+          <select id="f_start_time">${startTimeOptionsHtml(d, startIntervals)}</select>
+        </div>
+        <div class="field"><label>Trajanje</label>
+          <select id="f_duration">${durationOptionsHtml(d, durationIntervals)}</select>
+        </div>
+      </div>
+      ${(d.item_type==="task"||d.item_type==="internal_dev") ? `<div class="lunch-hint">Ako trajanje prijeđe 12:00–13:00, automatski se dijeli u dvije stavke — prije i poslije ručka.</div>` : ""}
+      <div class="field"><label>Bilješka (opcionalno)</label><textarea id="f_note">${escapeHtml(d.assigned_note||"")}</textarea></div>
+      ${isEdit
+        ? `<button type="button" class="btn btn-ghost" data-act="open-duplicate" style="width:100%;margin-bottom:4px;">${icon('copy',13)} Kopiraj na više dana</button>`
+        : `<button type="button" class="btn btn-ghost" data-act="open-duplicate" style="width:100%;margin-bottom:4px;">${icon('copy',13)} Kreiraj i na druge dane${st.extraDates && st.extraDates.size ? ` (+${st.extraDates.size})` : ""}</button>`}
+      <div class="modal-actions">
+        <div>${isEdit?`<button class="btn btn-danger" data-act="delete-item">${icon('trash',12)} Obriši</button>`:""}</div>
+        <div class="right"><button class="btn" data-act="close-overlay">Odustani</button><button class="btn btn-primary" data-act="save-item">Spremi</button></div>
+      </div>
+    </div>
+  </div>`;
+}
+function renderDatePickerPopup(){
+  const dp = state.datePicker;
+  const firstOfMonth = new Date(dp.year, dp.month-1, 1);
+  const startOffset = (firstOfMonth.getDay()+6)%7;
+  const daysInMonth = new Date(dp.year, dp.month, 0).getDate();
+  const totalCells = Math.ceil((startOffset+daysInMonth)/7)*7;
+  const selected = state.itemModal.data[dp.field];
+  let cells = "";
+  for(let i=0;i<totalCells;i++){
+    const dayNum = i - startOffset + 1;
+    if(dayNum<1 || dayNum>daysInMonth){ cells += `<button class="dp-day empty"></button>`; continue; }
+    const dISO = dp.year+"-"+String(dp.month).padStart(2,"0")+"-"+String(dayNum).padStart(2,"0");
+    const isSel = dISO===selected, isToday = dISO===todayISO();
+    cells += `<button class="dp-day ${isSel?"sel":""} ${isToday?"today":""}" data-act="pick-date" data-date="${dISO}">${dayNum}</button>`;
+  }
+  return `<div class="overlay top" data-act="close-datepicker">
+    <div class="modal narrow" data-stop="1">
+      <div class="dp-head">
+        <button class="btn btn-icon btn-ghost" data-act="dp-prev-month">${icon('chevronLeft',14)}</button>
+        <div class="dp-title">${MONTHS_HR[dp.month-1]} ${dp.year}.</div>
+        <button class="btn btn-icon btn-ghost" data-act="dp-next-month">${icon('chevronRight',14)}</button>
+      </div>
+      <div class="dp-grid">${DAYS_HR_SHORT.map(d=>`<div class="dp-dow">${d}</div>`).join("")}${cells}</div>
+      <div class="dp-actions">
+        <button class="btn btn-ghost btn-sm" data-act="clear-date">Očisti</button>
+        <button class="btn btn-ghost btn-sm" data-act="pick-date" data-date="${todayISO()}">Danas</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* =========================================================
+   REPORT MODAL
+   ========================================================= */
+function renderReportModal(){
+  const st = state.reportModal;
+  if(st.loading) return `<div class="overlay"><div class="modal wide"><p>Učitavanje izvještaja…</p></div></div>`;
+  const emp = state.employees.find(e=>e.id===st.employeeId);
+  const taskMap = {}; let internalMin=0, vacationMin=0;
+  st.items.forEach(it=>{
+    if(it.item_type==="task"){ const key=it.task_number||"(bez broja)"; taskMap[key]=(taskMap[key]||0)+it.duration_minutes; }
+    else if(it.item_type==="internal_dev"){ internalMin+=it.duration_minutes; }
+    else if(it.item_type==="vacation"){ vacationMin+=it.duration_minutes; }
+  });
+  const taskRows = Object.entries(taskMap).sort((a,b)=>b[1]-a[1]);
+  const workedTotal = taskRows.reduce((s,[,m])=>s+m,0) + internalMin;
+  const dailyRows = [...st.items].sort((a,b)=> a.item_date.localeCompare(b.item_date) || a.start_time.localeCompare(b.start_time))
+    .map(it=>`<tr><td class="mono">${it.item_date}</td><td>${TYPE_META[it.item_type].label}</td><td class="mono">${it.item_type==="task"?(it.task_number||"—"):"—"}</td><td>${minutesToHM(it.duration_minutes)}</td></tr>`).join("");
+  return `<div class="overlay" data-act="close-overlay">
+    <div class="modal wide" data-stop="1">
+      <div id="printArea" data-print-date="${new Date().toLocaleDateString('hr-HR')}"><div class="pdf-brandhead">RASPORED — DIZAJN TIM</div>
+        <div class="report-head"><h2>Tjedni izvještaj — ${escapeHtml(emp?emp.name:"")}</h2><div class="report-sub">${st.weekStart} — ${st.weekEnd}</div></div>
+        <table class="rep"><thead><tr><th>Task</th><th style="text-align:right">Sati</th></tr></thead><tbody>
+          ${taskRows.length ? taskRows.map(([k,m])=>`<tr><td class="mono">${escapeHtml(k)}</td><td style="text-align:right">${minutesToHM(m)}</td></tr>`).join("") : `<tr><td colspan="2" style="color:var(--text-3)">Nema taskova ovaj tjedan</td></tr>`}
+          ${internalMin ? `<tr><td>Interni razvoj</td><td style="text-align:right">${minutesToHM(internalMin)}</td></tr>` : ""}
+          <tr class="total"><td>Ukupno (radni sati)</td><td style="text-align:right">${minutesToHM(workedTotal)}</td></tr>
+          ${vacationMin ? `<tr><td>Godišnji odmor</td><td style="text-align:right">${minutesToHM(vacationMin)}</td></tr>` : ""}
+        </tbody></table>
+        <div class="rep-daily"><h4>Dnevni pregled</h4><table class="rep"><thead><tr><th>Datum</th><th>Tip</th><th>Task</th><th>Trajanje</th></tr></thead><tbody>${dailyRows || `<tr><td colspan="4" style="color:var(--text-3)">Nema unosa</td></tr>`}</tbody></table></div>
+        <div class="pdf-brandfoot">Generirano ${new Date().toLocaleDateString('hr-HR')}</div>
+      </div>
+      <div class="pdf-hint">PDF se automatski preuzima na tvoje računalo.</div>
+      <div class="modal-actions"><div></div><div class="right"><button class="btn" data-act="close-overlay">Zatvori</button><button class="btn btn-primary" data-act="print-report" data-filename="Ispis-${(emp?emp.name:'zaposlenik').replace(/\s+/g,'-')}-${st.weekStart}">${icon("printer",13)} Izvezi kao PDF</button></div></div>
+    </div>
+  </div>`;
+}
+
+/* =========================================================
+   EVENTS
+   ========================================================= */
+let drag = null;
+let suppressClickUntil = 0; // sprječava "duh-klik" na prazan slot ispod kartice koja je bila skrivena tijekom povlačenja
+
+function bindEvents(){
+  const app = document.getElementById("app");
+  if(!window._ctxMenuCloseBound){
+    window._ctxMenuCloseBound = true;
+    document.addEventListener("mousedown", (e)=>{
+      if(state.contextMenu && !e.target.closest(".ctx-menu")){ state.contextMenu=null; render(); }
+    }, true);
+  }
+  document.addEventListener("keydown", (e)=>{
+    const tag = (e.target.tagName||"").toLowerCase();
+    const inField = tag==="input" || tag==="textarea";
+    if(e.key==="Escape" && state.contextMenu){ state.contextMenu=null; render(); return; }
+    if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==="z"){
+      if(inField) return; // ne diraj undo unutar polja za unos
+      e.preventDefault();
+      if(e.shiftKey) redo(); else undo();
+      return;
+    }
+  });
+  app.onclick = async (e)=>{
+    if(Date.now() < suppressClickUntil){ e.stopPropagation(); return; }
+    if(state.contextMenu && !e.target.closest(".ctx-menu")){
+      state.contextMenu = null; render();
+      if(!e.target.closest("[data-act]")) return;
+    }
+    const t = e.target.closest("[data-act]");
+    if(!t) return;
+    const act = t.dataset.act;
+    if(state.employeeFilterOpen && !["toggle-emp-filter-dd","toggle-emp-filter-cb","filter-select-all","filter-select-none"].includes(act)){ state.employeeFilterOpen=false; }
+    if(state.itemModal && act!=="save-item" && act!=="delete-item") syncItemFormToState();
+
+    if(act==="close-overlay" && e.target===t){ closeAllModals(); return; }
+    if(act==="ctx-copy"){
+      const item = state.items.find(x=>x.id===state.contextMenu.itemId);
+      if(item) copyItemToClipboard(item);
+      return;
+    }
+    if(act==="ctx-paste"){
+      const cm = state.contextMenu;
+      await pasteClipboardAt(cm.employeeId, cm.dateISO, cm.startTime);
+      return;
+    }
+    if(act==="close-datepicker" && e.target===t){ state.datePicker=null; render(); return; }
+    if(act==="close-duplicate" && e.target===t){ closeDuplicatePanel(); return; }
+    if(act==="open-employees"){ state.employeeModalOpen=true; render(); return; }
+    if(act==="open-settings"){ openSettingsModal(); return; }
+    if(act==="close-settings" && e.target===t){ closeSettingsModal(); return; }
+    if(act==="unlock-settings"){ await unlockSettings(); return; }
+    if(act==="save-settings"){ await saveSettings(); return; }
+    if(act==="open-sound-form"){ openSoundForm(); return; }
+    if(act==="cancel-sound-form"){ cancelSoundForm(); return; }
+    if(act==="save-sound-mapping"){ await saveSoundMapping(); return; }
+    if(act==="remove-sound-mapping"){ await removeSoundMapping(t.dataset.initials); return; }
+    if(act==="preview-sound"){ previewSound(t.dataset.initials); return; }
+    if(act==="toggle-theme"){ toggleTheme(); return; }
+    if(act==="toggle-initials-picker"){ state.initialsPickerOpen = !state.initialsPickerOpen; render(); return; }
+    if(act==="ov-toggle-emp"){
+      const id = t.dataset.id;
+      if(t.checked) state.overviewSelectedEmpIds.add(id); else state.overviewSelectedEmpIds.delete(id);
+      refreshScheduleArea();
+      return;
+    }
+    if(act==="ov-select-all"){ state.overviewSelectedEmpIds = new Set(state.employees.filter(e=>e.active).map(e=>e.id)); refreshScheduleArea(); return; }
+    if(act==="ov-select-none"){ state.overviewSelectedEmpIds = new Set(); refreshScheduleArea(); return; }
+    if(act==="ov-prev-month"){
+      state.overviewStartDate = fmtISO(addDays(new Date(state.overviewStartDate+"T00:00:00"), -14));
+      await loadVisibleItems(true); refreshScheduleArea();
+      return;
+    }
+    if(act==="ov-next-month"){
+      state.overviewStartDate = fmtISO(addDays(new Date(state.overviewStartDate+"T00:00:00"), 14));
+      await loadVisibleItems(true); refreshScheduleArea();
+      return;
+    }
+    if(act==="save-initials"){ saveMyInitials(); return; }
+    if(act==="clear-initials"){ clearMyInitials(); return; }
+    if(act==="add-employee"){ await addEmployee(); return; }
+    if(act==="toggle-active-emp"){ await toggleActiveEmp(t.dataset.id); return; }
+    if(act==="delete-emp"){ await deleteEmp(t.dataset.id); return; }
+    if(act==="pick-color"){ pickColor(t.dataset.id); return; }
+    if(act==="set-color"){ await setEmpColor(t.dataset.id, t.dataset.color); return; }
+    if(act==="toggle-emp-filter-dd"){ state.employeeFilterOpen=!state.employeeFilterOpen; refreshScheduleArea(); return; }
+    if(act==="toggle-emp-filter-cb"){ toggleEmpFilter(t.dataset.id); return; }
+    if(act==="filter-select-all"){ state.hiddenEmployeeIds.clear(); refreshScheduleArea(); return; }
+    if(act==="filter-select-none"){ state.employees.filter(e=>e.active).forEach(e=>state.hiddenEmployeeIds.add(e.id)); refreshScheduleArea(); return; }
+    if(act==="set-view"){ state.viewMode=t.dataset.view; refreshScheduleArea(); loadVisibleItems().then(refreshScheduleArea); return; }
+    if(act==="nav-prev"){ navPeriod(-1); return; }
+    if(act==="nav-next"){ navPeriod(1); return; }
+    if(act==="goto-today"){ state.currentDate=todayISO(); refreshScheduleArea(); loadVisibleItems().then(refreshScheduleArea); return; }
+    if(act==="add-item-slot"){ openNewItem(t.dataset.emp, t.dataset.date, t.dataset.time); return; }
+    if(act==="add-item-board"){ if(e.target===t) addItemFromBoardClick(t, e); return; }
+    if(act==="edit-item"){ openEditItem(t.dataset.id); return; }
+    if(act==="quick-delete-item"){ await quickDeleteItem(t.dataset.id); return; }
+    if(act==="toggle-done"){ await toggleItemDone(t.dataset.id); return; }
+    if(act==="undo-action"){ if(state.undoStack.length) await undo(); return; }
+    if(act==="redo-action"){ if(state.redoStack.length) await redo(); return; }
+    if(act==="set-type"){ setItemType(t.dataset.type); return; }
+    if(act==="save-item"){ await saveItem(); return; }
+    if(act==="delete-item"){ await deleteItem(); return; }
+    if(act==="open-datepicker"){ openDatePicker(t.dataset.field); return; }
+    if(act==="dp-prev-month"){ dpShiftMonth(-1); return; }
+    if(act==="dp-next-month"){ dpShiftMonth(1); return; }
+    if(act==="pick-date"){ pickDate(t.dataset.date); return; }
+    if(act==="clear-date"){ pickDate(null); return; }
+    if(act==="open-duplicate"){ openDuplicatePanel(); return; }
+    if(act==="dup-prev-month"){ dupShiftMonth(-1); return; }
+    if(act==="dup-next-month"){ dupShiftMonth(1); return; }
+    if(act==="toggle-dup-date"){ toggleDupDate(t.dataset.date); return; }
+    if(act==="dup-quick"){ dupQuickAdd(t.dataset.kind); return; }
+    if(act==="confirm-duplicate"){ await confirmDuplicate(); return; }
+    if(act==="open-report"){ await openReport(t.dataset.emp); return; }
+    if(act==="open-month-overview"){ await openMonthOverview(); return; }
+    if(act==="mo-scope"){ await switchOverviewScope(t.dataset.scope, t.dataset.scope==="week" ? (state.monthOverview.scope==="week"?state.monthOverview.rangeStart:null) : null); return; }
+    if(act==="mo-pick-week"){ await switchOverviewScope("week", t.dataset.start); return; }
+    if(act==="print-report"){ await exportPdf(t.dataset.filename||"raspored-izvjestaj"); return; }
+  };
+  app.onchange = (e)=>{
+    if(e.target.id==="f_whole_day"){ document.getElementById("timeFields").style.display = e.target.checked ? "none" : ""; }
+    if(e.target.id==="f_start_time"){ syncItemFormToState(); render(); }
+    if(e.target.id==="f_employee"){ syncItemFormToState(); render(); }
+    if(e.target.id==="f_task_link" || e.target.id==="f_note"){ syncItemFormToState(); }
+  };
+  app.oninput = (e)=>{
+    if(e.target.id==="f_task_link"){
+      // ako se zalijepi link tipa https://.../browse/TEVA-1234, automatski povuci broj taska
+      const m = e.target.value.match(/TEVA-(\d+)/i);
+      if(m){
+        const numEl = document.getElementById("f_task_number");
+        if(numEl && !numEl.value.trim()) numEl.value = m[1];
+      }
+    }
+    if(e.target.id==="newSoundInitials"){ state.newSoundInitials = e.target.value; }
+  };
+
+  const dropzone = document.getElementById("soundDropzone");
+  if(dropzone){
+    const fileInput = document.getElementById("soundFileInput");
+    dropzone.addEventListener("click", ()=> fileInput.click());
+    fileInput.addEventListener("change", ()=>{ if(fileInput.files[0]) handleSoundFileSelected(fileInput.files[0]); });
+    dropzone.addEventListener("dragover", (e)=>{ e.preventDefault(); dropzone.classList.add("drag-over"); });
+    dropzone.addEventListener("dragleave", ()=>{ dropzone.classList.remove("drag-over"); });
+    dropzone.addEventListener("drop", (e)=>{
+      e.preventDefault(); dropzone.classList.remove("drag-over");
+      if(e.dataTransfer.files[0]) handleSoundFileSelected(e.dataTransfer.files[0]);
+    });
+  }
+
+  bindScheduleAreaEvents();
+}
+// Bound ONCE at startup (not per-render) — attaching this inside bindEvents() on every
+// render leaked a duplicate listener each time, which is why things got slower the longer you used the app.
+document.getElementById("app").addEventListener("blur", async (e)=>{
+  if(e.target.dataset && e.target.dataset.act==="rename-emp"){
+    const id=e.target.dataset.id, name=e.target.value.trim();
+    if(name){ try{ await Employees.update(id,{name}); const emp=state.employees.find(x=>x.id===id); if(emp) emp.name=name; }catch(err){ showToast("Greška: "+err.message); } }
+  }
+}, true);
+function closeAllModals(){ state.employeeModalOpen=false; state.itemModal=null; state.reportModal=null; state.datePicker=null; state.monthOverview=null; render(); }
+
+/* =========================================================
+   PDF EXPORT — native jsPDF (bez html2canvas/canvas snimanja)
+   Generira se izravno tekstom/tablicama pomoću jsPDF-a, bez fotografiranja
+   DOM-a u canvas. Ovo zaobilazi sve poznate html2canvas probleme (cloned
+   iframe, corrupt PNG, prazan canvas) jer canvas uopće nije uključen -
+   PDF je pravi tekst, pretraživ, i identično radi u svakom browseru.
+   ========================================================= */
+function pdfHeader(pdf, marginL, pageW, title, subtitle){
+  pdf.setFont("helvetica","bold"); pdf.setFontSize(9);
+  pdf.setTextColor(0,130,47);
+  pdf.text("RASPORED — DIZAJN TIM", marginL, 15);
+  pdf.setDrawColor(0,160,59); pdf.setLineWidth(0.4);
+  pdf.line(marginL, 18, pageW-marginL, 18);
+  pdf.setTextColor(30,30,30);
+  pdf.setFont("helvetica","bold"); pdf.setFontSize(15);
+  pdf.text(title, marginL, 28);
+  pdf.setFont("helvetica","normal"); pdf.setFontSize(10);
+  pdf.setTextColor(120,120,120);
+  pdf.text(subtitle, marginL, 34);
+  pdf.setTextColor(30,30,30);
+  return 42;
+}
+function pdfFooter(pdf, marginL, pageW, pageH){
+  const pages = pdf.internal.getNumberOfPages();
+  for(let i=1;i<=pages;i++){
+    pdf.setPage(i);
+    pdf.setDrawColor(225,227,231); pdf.setLineWidth(0.2);
+    pdf.line(marginL, pageH-14, pageW-marginL, pageH-14);
+    pdf.setFont("helvetica","normal"); pdf.setFontSize(8);
+    pdf.setTextColor(150,150,150);
+    pdf.text("Generirano "+new Date().toLocaleDateString("hr-HR"), marginL, pageH-9);
+    pdf.text(String(i)+" / "+pages, pageW-marginL, pageH-9, {align:"right"});
+    pdf.setTextColor(30,30,30);
+  }
+}
+// jednostavan tablični crtač (bez vanjskog autoTable plugina)
+function pdfTable(pdf, opts){
+  const pageH = opts.pageH, marginB = 20, rowH = opts.rowH||7;
+  let y = opts.y;
+  const totalW = opts.colWidths.reduce((a,b)=>a+b,0);
+  function newPageIfNeeded(need){
+    if(y+need > pageH-marginB){ pdf.addPage(); y = 20; return true; }
+    return false;
+  }
+  newPageIfNeeded(rowH+2);
+  pdf.setFillColor(244,245,247);
+  pdf.rect(opts.x, y-5, totalW, rowH, "F");
+  pdf.setFont("helvetica","bold"); pdf.setFontSize(9); pdf.setTextColor(70,70,70);
+  let cx = opts.x;
+  opts.header.forEach((h,i)=>{
+    const align = (opts.colAligns&&opts.colAligns[i])||"left";
+    pdf.text(String(h), align==="right"?cx+opts.colWidths[i]-2:cx+2, y, {align:align==="right"?"right":"left"});
+    cx += opts.colWidths[i];
+  });
+  y += rowH;
+  pdf.setFont("helvetica","normal"); pdf.setFontSize(9); pdf.setTextColor(40,40,40);
+  opts.rows.forEach((row,idx)=>{
+    newPageIfNeeded(rowH);
+    if(row._bold){ pdf.setFont("helvetica","bold"); pdf.setDrawColor(210,212,218); pdf.setLineWidth(0.3); pdf.line(opts.x,y-5,opts.x+totalW,y-5); }
+    else if(idx%2===1){ pdf.setFillColor(250,250,251); pdf.rect(opts.x,y-5,totalW,rowH,"F"); }
+    let cx2 = opts.x;
+    row.forEach((cell,i)=>{
+      const align = (opts.colAligns&&opts.colAligns[i])||"left";
+      pdf.text(String(cell), align==="right"?cx2+opts.colWidths[i]-2:cx2+2, y, {align:align==="right"?"right":"left"});
+      cx2 += opts.colWidths[i];
+    });
+    if(row._bold) pdf.setFont("helvetica","normal");
+    y += rowH;
+  });
+  return y;
+}
+
+function buildWeeklyReportPdf(filenameBase){
+  const st = state.reportModal;
+  const emp = state.employees.find(e=>e.id===st.employeeId);
+  const taskMap = {}; let internalMin=0, vacationMin=0;
+  st.items.forEach(it=>{
+    if(it.item_type==="task"){ const key=it.task_number||"(bez broja)"; taskMap[key]=(taskMap[key]||0)+it.duration_minutes; }
+    else if(it.item_type==="internal_dev"){ internalMin+=it.duration_minutes; }
+    else if(it.item_type==="vacation"){ vacationMin+=it.duration_minutes; }
+  });
+  const taskRows = Object.entries(taskMap).sort((a,b)=>b[1]-a[1]);
+  const workedTotal = taskRows.reduce((s,[,m])=>s+m,0) + internalMin;
+  const dailyItems = [...st.items].sort((a,b)=> a.item_date.localeCompare(b.item_date) || a.start_time.localeCompare(b.start_time));
+
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF("p","mm","a4");
+  const pageW = pdf.internal.pageSize.getWidth(), pageH = pdf.internal.pageSize.getHeight();
+  const marginL = 15;
+  let y = pdfHeader(pdf, marginL, pageW, "Tjedni izvještaj — "+(emp?emp.name:""), st.weekStart+" — "+st.weekEnd);
+
+  const taskTableRows = taskRows.length ? taskRows.map(([k,m])=>[k, minutesToHM(m)]) : [["Nema taskova ovaj tjedan",""]];
+  if(internalMin) taskTableRows.push(["Interni razvoj", minutesToHM(internalMin)]);
+  taskTableRows.push(Object.assign(["UKUPNO (radni sati)", minutesToHM(workedTotal)], {_bold:true}));
+  if(vacationMin) taskTableRows.push(["Godišnji odmor", minutesToHM(vacationMin)]);
+
+  y = pdfTable(pdf, {x:marginL, y:y+4, pageH, colWidths:[pageW-2*marginL-40,40], colAligns:["left","right"], header:["Task","Sati"], rows:taskTableRows});
+
+  y += 10;
+  pdf.setFont("helvetica","bold"); pdf.setFontSize(11); pdf.setTextColor(30,30,30);
+  pdf.text("Dnevni pregled", marginL, y);
+  y += 5;
+  const dailyTableRows = dailyItems.length
+    ? dailyItems.map(it=>[it.item_date, TYPE_META[it.item_type].label, it.item_type==="task"?(it.task_number||"—"):"—", minutesToHM(it.duration_minutes)])
+    : [["Nema unosa","","",""]];
+  pdfTable(pdf, {x:marginL, y, pageH, colWidths:[28,32,60,pageW-2*marginL-120], colAligns:["left","left","left","right"], header:["Datum","Tip","Task","Trajanje"], rows:dailyTableRows});
+
+  pdfFooter(pdf, marginL, pageW, pageH);
+  pdf.save(filenameBase.replace(/[^a-zA-Z0-9čćšđžČĆŠĐŽ_-]+/g,"-") + ".pdf");
+}
+
+function buildMonthOverviewPdf(filenameBase){
+  const st = state.monthOverview;
+  const scopeLabel = st.scope==="week"
+    ? fmtDateShort(st.rangeStart)+"–"+fmtDateShort(st.rangeEnd)+" "+st.year+"."
+    : MONTHS_HR[st.month-1]+" "+st.year+".";
+  const activeEmps = state.employees.filter(e=>e.active);
+
+  const capacityStats = activeEmps.map(emp=>{
+    const { availableMin, vacationMin } = employeeRangeCapacity(emp.id, st.rangeStart, st.rangeEnd, st.items);
+    const bookedMin = st.items.filter(it=>it.employee_id===emp.id && it.item_type!=="vacation")
+      .reduce((s,it)=>s+effectiveWorkMinutes(it.start_time, it.duration_minutes), 0);
+    const pct = availableMin>0 ? Math.round(bookedMin/availableMin*100) : (bookedMin>0 ? 999 : 0);
+    return { emp, availableMin, bookedMin, vacationMin, pct };
+  }).filter(x=>x.availableMin>0 || x.bookedMin>0);
+
+  const taskMap = {};
+  st.items.filter(it=>it.item_type==="task").forEach(it=>{
+    const k = it.task_number||"(bez broja)";
+    taskMap[k] = (taskMap[k]||0)+it.duration_minutes;
+  });
+  const taskRows = Object.entries(taskMap).sort((a,b)=>b[1]-a[1]).slice(0,15);
+
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF("p","mm","a4");
+  const pageW = pdf.internal.pageSize.getWidth(), pageH = pdf.internal.pageSize.getHeight();
+  const marginL = 15;
+  let y = pdfHeader(pdf, marginL, pageW, "Pregled — "+scopeLabel, activeEmps.length+" aktivnih zaposlenika");
+
+  pdf.setFont("helvetica","bold"); pdf.setFontSize(11); pdf.text("Iskorištenost kapaciteta", marginL, y); y+=5;
+  const capRows = capacityStats.length
+    ? capacityStats.map(x=>[x.emp.name, minutesToHM(x.bookedMin), minutesToHM(x.availableMin), x.pct+"%"+(x.vacationMin?" ("+minutesToHM(x.vacationMin)+" god.)":"")])
+    : [["Nema podataka za ovo razdoblje","","",""]];
+  y = pdfTable(pdf, {x:marginL, y, pageH, colWidths:[60,35,35,pageW-2*marginL-130], colAligns:["left","right","right","right"], header:["Zaposlenik","Rezervirano","Dostupno","Popunjenost"], rows:capRows});
+
+  y += 10;
+  pdf.setFont("helvetica","bold"); pdf.setFontSize(11); pdf.text("Najviše radnih sati po tasku", marginL, y); y+=5;
+  const taskTableRows = taskRows.length ? taskRows.map(([k,m])=>[k, minutesToHM(m)]) : [["Nema taskova u ovom razdoblju",""]];
+  pdfTable(pdf, {x:marginL, y, pageH, colWidths:[pageW-2*marginL-40,40], colAligns:["left","right"], header:["Task","Sati"], rows:taskTableRows});
+
+  pdfFooter(pdf, marginL, pageW, pageH);
+  pdf.save(filenameBase.replace(/[^a-zA-Z0-9čćšđžČĆŠĐŽ_-]+/g,"-") + ".pdf");
+}
+
+async function exportPdf(filenameBase){
+  if(!window.jspdf){
+    showToast("PDF alat nije dostupan (provjeri internet vezu) — otvaram standardni ispis.");
+    window.print();
+    return;
+  }
+  try{
+    if(state.reportModal){ buildWeeklyReportPdf(filenameBase); }
+    else if(state.monthOverview){ buildMonthOverviewPdf(filenameBase); }
+    else { throw new Error("Nepoznat kontekst izvještaja"); }
+    showToast("PDF preuzet.");
+  }catch(err){
+    console.error("PDF export error:", err);
+    const msg = (err && (err.message || err.name)) || (typeof err==="string" ? err : "") || "nepoznata greška (vidi konzolu, F12)";
+    showToast("Greška kod izvoza PDF-a: "+msg+" — otvaram standardni ispis kao zamjenu.");
+    window.print();
+  }
+}
+
+/* ---- lightweight refresh for filter-only changes (skips rebuilding the whole page) ---- */
+function refreshScheduleArea(){
+  const el = document.getElementById("scheduleArea");
+  if(!el){ render(); return; }
+  const snap = captureScroll();
+  el.outerHTML = renderScheduleArea();
+  bindScheduleAreaEvents();
+  restoreScroll(snap);
+}
+function bindScheduleAreaEvents(){
+  const root = document.getElementById("scheduleArea");
+  if(!root) return;
+  root.querySelectorAll(".item-block").forEach(block=>{
+    block.addEventListener("mousedown",(e)=>{ if(e.button!==0 || e.target.dataset.act==="resize-handle" || e.target.closest(".hover-popup") || e.target.closest(".item-del") || e.target.closest(".item-done-btn")) return; startDrag(e, block, "move"); });
+  });
+  root.querySelectorAll(".resize-handle").forEach(h=>{
+    h.addEventListener("mousedown",(e)=>{ if(e.button!==0) return; e.stopPropagation(); startDrag(e, h.closest(".item-block"), "resize"); });
+  });
+  root.querySelectorAll(".mb-block").forEach(b=>{
+    b.addEventListener("mousedown",(e)=>{ if(e.button!==0 || e.target.closest(".link-flag") || e.target.closest(".mb-resize") || e.target.closest(".hover-popup") || e.target.closest(".item-del") || e.target.closest(".item-done-btn")) return; startMiniDrag(e, b); });
+  });
+  root.querySelectorAll(".mb-resize").forEach(h=>{
+    h.addEventListener("mousedown",(e)=>{ if(e.button!==0) return; e.stopPropagation(); startMiniResize(e, h.closest(".mb-block")); });
+  });
+
+  /* ---- copy/paste: desni klik meni (varijanta 1) ---- */
+  root.querySelectorAll(".item-block, .mb-block").forEach(block=>{
+    block.addEventListener("contextmenu",(e)=>{
+      e.preventDefault(); e.stopPropagation();
+      const item = state.items.find(x=>x.id===block.dataset.id);
+      if(!item) return;
+      state.contextMenu = { mode:"task", x:e.clientX, y:e.clientY, itemId:item.id };
+      render();
+    });
+  });
+  root.querySelectorAll(".slot-hit, .mboard").forEach(slot=>{
+    slot.addEventListener("contextmenu",(e)=>{
+      e.preventDefault();
+      const target = getSlotTargetAtPoint(e.clientX, e.clientY);
+      if(!target) return;
+      state.contextMenu = Object.assign({ mode:"slot", x:e.clientX, y:e.clientY }, target);
+      render();
+    });
+  });
+
+  const ovTooltip = document.getElementById("ovTooltip");
+  if(ovTooltip){
+    root.querySelectorAll(".ov-cell").forEach(cell=>{
+      cell.addEventListener("mousemove",(e)=>{
+        ovTooltip.style.display="block";
+        ovTooltip.style.left = e.clientX+"px";
+        ovTooltip.style.top = e.clientY+"px";
+        const mIdx = new Date(cell.dataset.date+"T00:00:00").getMonth();
+        ovTooltip.innerHTML = `<b>${cell.dataset.name}</b> — ${cell.dataset.day}. ${MONTHS_HR[mIdx]}<br>${cell.dataset.label}`;
+      });
+      cell.addEventListener("mouseleave",()=>{ ovTooltip.style.display="none"; });
+    });
+  }
+}
+
+/* ---- filter / nav ---- */
+function toggleEmpFilter(id){
+  if(state.hiddenEmployeeIds.has(id)) state.hiddenEmployeeIds.delete(id); else state.hiddenEmployeeIds.add(id);
+  refreshScheduleArea();
+}
+function navPeriod(dir){
+  const step = state.viewMode==="day"?1: state.viewMode==="3day"?3:7;
+  const d = new Date(state.currentDate+"T00:00:00");
+  d.setDate(d.getDate()+dir*step);
+  state.currentDate = fmtISO(d);
+  refreshScheduleArea(); // update instantly with whatever's cached; fetch quietly in background
+  loadVisibleItems().then(refreshScheduleArea);
+}
+
+/* ---- employees ---- */
+async function addEmployee(){
+  const input = document.getElementById("newEmpName");
+  const name = input.value.trim();
+  if(!name) return;
+  const color = EMP_COLORS[state.employees.length % EMP_COLORS.length];
+  try{
+    const created = await Employees.create({name,color,active:true});
+    const row = Array.isArray(created) ? created[0] : created;
+    state.employees.push(row);
+    render();
+  }catch(err){ showToast("Greška: "+err.message); }
+}
+async function toggleActiveEmp(id){
+  const emp = state.employees.find(e=>e.id===id);
+  try{ await Employees.update(id,{active:!emp.active}); emp.active=!emp.active; render(); }
+  catch(err){ showToast("Greška: "+err.message); }
+}
+async function deleteEmp(id){
+  if(!confirm("Ukloniti zaposlenika? Ovo briše i sve njegove stavke rasporeda.")) return;
+  try{ await Employees.remove(id); state.employees=state.employees.filter(e=>e.id!==id); state.items=state.items.filter(it=>it.employee_id!==id); render(); }
+  catch(err){ showToast("Greška: "+err.message); }
+}
+function pickColor(id){
+  state.colorPickerOpenFor = (state.colorPickerOpenFor===id) ? null : id;
+  render();
+}
+async function setEmpColor(id, color){
+  state.colorPickerOpenFor = null;
+  try{ await Employees.update(id,{color}); const emp=state.employees.find(x=>x.id===id); if(emp) emp.color=color; render(); }
+  catch(err){ showToast("Greška: "+err.message); render(); }
+}
+
+/* ---- items ---- */
+function openNewItem(employeeId, date, time){
+  state.itemModal = { mode:"create", error:null, extraDates: new Set(), data:{
+    employee_id:employeeId, item_date:date, start_time:time, duration_minutes:30,
+    item_type:"task", task_number:null, task_link:"", assigned_note:"", first_version_date:null, due_date:null,
+  }};
+  render();
+}
+function openEditItem(id){
+  const it = state.items.find(x=>x.id===id);
+  if(!it) return;
+  state.itemModal = { mode:"edit", id, error:null, data: Object.assign({}, it) };
+  render();
+}
+function setItemType(type){ syncItemFormToState(); state.itemModal.data.item_type=type; render(); }
+function syncItemFormToState(){
+  const st = state.itemModal;
+  if(!st) return;
+  const d = st.data;
+  const empEl = document.getElementById("f_employee"); if(empEl) d.employee_id = empEl.value;
+  const noteEl = document.getElementById("f_note"); if(noteEl) d.assigned_note = noteEl.value;
+  if(d.item_type==="task"){
+    const tnEl = document.getElementById("f_task_number");
+    if(tnEl){ const suffix = tnEl.value; d.task_number = suffix ? ("TEVA-"+suffix) : null; }
+    const linkEl = document.getElementById("f_task_link"); if(linkEl) d.task_link = linkEl.value;
+  }
+  const startEl = document.getElementById("f_start_time"); if(startEl) d.start_time = startEl.value;
+  const durEl = document.getElementById("f_duration"); if(durEl) d.duration_minutes = parseInt(durEl.value);
+}
+
+function openDatePicker(field){
+  const cur = state.itemModal.data[field];
+  const base = cur ? new Date(cur+"T00:00:00") : new Date(state.itemModal.data.item_date+"T00:00:00");
+  state.datePicker = { field, year:base.getFullYear(), month:base.getMonth()+1 };
+  render();
+}
+function dpShiftMonth(dir){
+  let { year, month } = state.datePicker;
+  month += dir;
+  if(month<1){ month=12; year--; } if(month>12){ month=1; year++; }
+  state.datePicker.year=year; state.datePicker.month=month;
+  render();
+}
+function pickDate(dateISO){
+  state.itemModal.data[state.datePicker.field] = dateISO;
+  state.datePicker = null;
+  render();
+}
+
+/* ---- duplicate to multiple days ---- */
+function openDuplicatePanel(){
+  const base = new Date(state.itemModal.data.item_date+"T00:00:00");
+  const deferred = state.itemModal.mode==="create";
+  const preselected = deferred && state.itemModal.extraDates ? new Set(state.itemModal.extraDates) : new Set();
+  state.duplicatePanel = { year: base.getFullYear(), month: base.getMonth()+1, selectedDates: preselected, deferred };
+  render();
+}
+function closeDuplicatePanel(){ state.duplicatePanel = null; render(); }
+function dupShiftMonth(dir){
+  let { year, month } = state.duplicatePanel;
+  month += dir; if(month<1){ month=12; year--; } if(month>12){ month=1; year++; }
+  state.duplicatePanel.year=year; state.duplicatePanel.month=month;
+  render();
+}
+function toggleDupDate(dateISO){
+  const sel = state.duplicatePanel.selectedDates;
+  if(sel.has(dateISO)) sel.delete(dateISO); else sel.add(dateISO);
+  render();
+}
+function dupQuickAdd(kind){
+  const base = new Date(state.itemModal.data.item_date+"T00:00:00");
+  const sel = state.duplicatePanel.selectedDates;
+  if(kind==="tomorrow"){
+    sel.add(fmtISO(addDays(base,1)));
+  } else if(kind==="weekdays5"){
+    let d = new Date(base), count=0;
+    while(count<5){
+      d = addDays(d,1);
+      if(!isWeekend(fmtISO(d))){ sel.add(fmtISO(d)); count++; }
+    }
+  } else if(kind==="nextweek"){
+    sel.add(fmtISO(addDays(base,7)));
+  }
+  const last = [...sel].sort().pop();
+  if(last){ const ld = new Date(last+"T00:00:00"); state.duplicatePanel.year=ld.getFullYear(); state.duplicatePanel.month=ld.getMonth()+1; }
+  render();
+}
+function renderDuplicatePanel(){
+  const dp = state.duplicatePanel;
+  const origDate = state.itemModal.data.item_date;
+  const firstOfMonth = new Date(dp.year, dp.month-1, 1);
+  const startOffset = (firstOfMonth.getDay()+6)%7;
+  const daysInMonth = new Date(dp.year, dp.month, 0).getDate();
+  const totalCells = Math.ceil((startOffset+daysInMonth)/7)*7;
+  let cells = "";
+  for(let i=0;i<totalCells;i++){
+    const dayNum = i - startOffset + 1;
+    if(dayNum<1 || dayNum>daysInMonth){ cells += `<button class="dp-day empty"></button>`; continue; }
+    const dISO = dp.year+"-"+String(dp.month).padStart(2,"0")+"-"+String(dayNum).padStart(2,"0");
+    const isSel = dp.selectedDates.has(dISO), isToday = dISO===todayISO(), isOrig = dISO===origDate;
+    cells += `<button class="dp-day ${isSel?"sel":""} ${isToday?"today":""} ${isOrig?"orig":""}" data-act="toggle-dup-date" data-date="${dISO}" title="${isOrig?'Izvorni datum':''}">${dayNum}</button>`;
+  }
+  const count = dp.selectedDates.size;
+  return `<div class="overlay top" data-act="close-duplicate">
+    <div class="modal narrow" data-stop="1">
+      <h2 style="margin-bottom:10px;">${dp.deferred ? "Kreiraj i na dodatne dane" : "Kopiraj na više dana"}</h2>
+      <div class="dup-quick">
+        <button class="btn btn-ghost btn-sm" data-act="dup-quick" data-kind="tomorrow">Sutra</button>
+        <button class="btn btn-ghost btn-sm" data-act="dup-quick" data-kind="weekdays5">Idućih 5 radnih dana</button>
+        <button class="btn btn-ghost btn-sm" data-act="dup-quick" data-kind="nextweek">Isti dan idući tjedan</button>
+      </div>
+      <div class="dp-head">
+        <button class="btn btn-icon btn-ghost" data-act="dup-prev-month">${icon('chevronLeft',14)}</button>
+        <div class="dp-title">${MONTHS_HR[dp.month-1]} ${dp.year}.</div>
+        <button class="btn btn-icon btn-ghost" data-act="dup-next-month">${icon('chevronRight',14)}</button>
+      </div>
+      <div class="dp-grid">${DAYS_HR_SHORT.map(d=>`<div class="dp-dow">${d}</div>`).join("")}${cells}</div>
+      <div class="dup-hint">${dp.deferred ? `Klikni dane koje želiš uključiti uz izvorni datum (${count} odabrano). Sve se kreira odjednom kad klikneš "Spremi" u glavnoj formi.` : `Klikni dane koje želiš dodati (${count} odabrano)`}</div>
+      <div class="modal-actions">
+        <button class="btn" data-act="close-duplicate">${dp.deferred ? "Zatvori" : "Odustani"}</button>
+        ${dp.deferred
+          ? `<button class="btn btn-primary" data-act="confirm-duplicate">${icon('check',13)} Potvrdi (${count})</button>`
+          : `<button class="btn btn-primary" data-act="confirm-duplicate" ${count===0?"disabled":""}>${icon('copy',13)} Kopiraj (${count})</button>`}
+      </div>
+    </div>
+  </div>`;
+}
+async function confirmDuplicate(){
+  const dp = state.duplicatePanel;
+  const dates = Array.from(dp.selectedDates);
+  if(dp.deferred){
+    // create mode: samo spremi odabir, kreiranje se događa zajedno s glavnim Spremi
+    state.itemModal.extraDates = new Set(dates);
+    state.duplicatePanel = null;
+    render();
+    return;
+  }
+  const d = state.itemModal.data;
+  if(!dates.length) return;
+  const base = {
+    employee_id:d.employee_id, item_type:d.item_type, start_time:d.start_time, duration_minutes:d.duration_minutes,
+    task_number:d.task_number, task_link:d.task_link, assigned_note:d.assigned_note,
+    first_version_date:d.first_version_date, due_date:d.due_date,
+  };
+  let created=0, failed=0;
+  await withUndoBatch("dupliciranje na "+dates.length+" dana", async ()=>{
+    for(const dateISO of dates){
+      try{ await Items.create(Object.assign({}, base, {item_date:dateISO})); created++; }
+      catch(err){ failed++; }
+    }
+  });
+  state.duplicatePanel = null;
+  state.itemModal = null;
+  await loadVisibleItems(true);
+  render();
+  showToast(created+" kopija kreirano"+(failed?`, ${failed} nije uspjelo`:""));
+}
+
+async function saveItem(){
+  const st = state.itemModal; const d = st.data;
+  d.employee_id = document.getElementById("f_employee").value;
+  d.assigned_note = document.getElementById("f_note").value.trim() || null;
+  if(d.item_type==="task"){
+    const suffix = document.getElementById("f_task_number").value.trim();
+    d.task_number = suffix ? ("TEVA-"+suffix) : null;
+    d.task_link = normalizeUrl(document.getElementById("f_task_link").value.trim()) || null;
+  } else { d.task_number=null; d.task_link=null; d.first_version_date=null; d.due_date=null; }
+  const wholeDayEl = document.getElementById("f_whole_day");
+  if(d.item_type==="vacation" && wholeDayEl && wholeDayEl.checked){ d.start_time="08:00"; d.duration_minutes=540; }
+  else { d.start_time = document.getElementById("f_start_time").value; d.duration_minutes = parseInt(document.getElementById("f_duration").value); }
+
+  const payload = {
+    employee_id:d.employee_id, item_type:d.item_type, item_date:d.item_date, start_time:d.start_time, duration_minutes:d.duration_minutes,
+    task_number:d.task_number, task_link:d.task_link, assigned_note:d.assigned_note, first_version_date:d.first_version_date, due_date:d.due_date,
+  };
+
+  // CREATE mode: podržava odmah kreiranje na više odabranih dana ("Kopiraj i na druge dane"),
+  // svaki dan zasebno poštuje pauzu za ručak, sve grupirano kao JEDNA logička radnja (undo/redo).
+  if(st.mode==="create"){
+    const extraDates = st.extraDates ? Array.from(st.extraDates) : [];
+    const allDates = [d.item_date, ...extraDates];
+    let anySplit = false, anyTruncated = false;
+    try{
+      await withUndoBatch(allDates.length>1 ? ("dodavanje na "+allDates.length+" dana") : "dodavanje", async ()=>{
+        for(const dateISO of allDates){
+          const dayPayload = Object.assign({}, payload, {item_date:dateISO});
+          const split = computeLunchSplit(d.item_type, d.start_time, d.duration_minutes);
+          if(!split){
+            const row = await Items.create(dayPayload); state.items.push(row);
+          } else if(!split.splitInTwo){
+            const row = await Items.create(Object.assign({}, dayPayload, split.shifted)); state.items.push(row);
+            anySplit = true; if(split.truncated) anyTruncated = true;
+          } else {
+            const row1 = await Items.create(Object.assign({}, dayPayload, split.seg1)); state.items.push(row1);
+            const row2 = await Items.create(Object.assign({}, dayPayload, split.seg2)); state.items.push(row2);
+            anySplit = true; if(split.truncated) anyTruncated = true;
+          }
+        }
+      });
+      state.itemModal=null; render();
+      const parts = [];
+      if(allDates.length>1) parts.push(`Kreirano na ${allDates.length} dana.`);
+      else parts.push("Task dodan.");
+      if(anySplit) parts.push("Neki unosi su razdvojeni/pomaknuti zbog pauze za ručak.");
+      if(anyTruncated) parts.push("Dio je skraćen da stane do kraja radnog dana (17:00).");
+      showToast(parts.join(" "));
+      maybePlayCreationSound();
+    }catch(err){ st.error=err.message; render(); }
+    return;
+  }
+
+  // EDIT mode (postojeća stavka) - nepromijenjeno
+  const split = computeLunchSplit(d.item_type, d.start_time, d.duration_minutes);
+  const splitInTwo = !!(split && split.splitInTwo);
+  const shiftWhole = !!(split && !split.splitInTwo);
+
+  try{
+    if(splitInTwo){
+      const payload1 = Object.assign({}, payload, split.seg1);
+      const payload2 = Object.assign({}, payload, split.seg2);
+      await withUndoBatch("razdvajanje preko pauze", async ()=>{
+        const row1 = await Items.update(st.id, payload1);
+        const idx = state.items.findIndex(x=>x.id===st.id);
+        if(idx>-1) state.items[idx] = Array.isArray(row1)?row1[0]:row1;
+        const row2 = await Items.create(payload2); state.items.push(Array.isArray(row2)?row2[0]:row2);
+      });
+      state.itemModal=null; render();
+      showToast("Task ide preko pauze — razdvojen u dvije stavke (prije i poslije ručka), ukupno trajanje sačuvano."+(split.truncated?" Dio poslije ručka je skraćen da stane do kraja radnog dana (17:00).":""));
+      return;
+    }
+    if(shiftWhole){
+      const payload1 = Object.assign({}, payload, split.shifted);
+      const row1 = await Items.update(st.id, payload1);
+      const idx = state.items.findIndex(x=>x.id===st.id);
+      if(idx>-1) state.items[idx] = Array.isArray(row1)?row1[0]:row1;
+      state.itemModal=null; render();
+      showToast("Odabrano vrijeme je u pauzi za ručak — pomaknuto na 13:00."+(split.truncated?" Trajanje je skraćeno da stane do kraja radnog dana (17:00).":""));
+      return;
+    }
+    const updated = await Items.update(st.id, payload);
+    const row = Array.isArray(updated)?updated[0]:updated;
+    const idx = state.items.findIndex(x=>x.id===st.id);
+    if(idx>-1) state.items[idx]=row;
+    state.itemModal=null; render();
+  }catch(err){ st.error=err.message; render(); }
+}
+async function deleteItem(){
+  const st = state.itemModal;
+  if(!st.id) return;
+  if(!confirm("Obrisati ovu stavku?")) return;
+  try{ await Items.remove(st.id); state.items=state.items.filter(x=>x.id!==st.id); state.itemModal=null; render(); }
+  catch(err){ st.error=err.message; render(); }
+}
+async function quickDeleteItem(id){
+  if(!id) return;
+  try{
+    await Items.remove(id);
+    state.items = state.items.filter(x=>x.id!==id);
+    render();
+    showToast("Stavka obrisana. (Undo dostupan)");
+  }catch(err){ showToast("Greška kod brisanja: "+err.message); }
+}
+
+/* ---- day-view drag / resize (pixel precise) ---- */
+function startDrag(e, blockEl, mode){
+  e.preventDefault();
+  const id = blockEl.dataset.id;
+  const item = state.items.find(x=>x.id===id);
+  if(!item) return;
+  drag = { kind:"day", mode, id, blockEl, startY:e.clientY, startX:e.clientX, origStart:item.start_time, origDuration:item.duration_minutes, origEmployee:item.employee_id };
+  blockEl.classList.add("dragging");
+  document.addEventListener("mousemove", onDragMove);
+  document.addEventListener("mouseup", onDragEnd);
+}
+function onDragMove(e){
+  if(!drag || drag.kind!=="day") return;
+  const dayPxPerMin = state.settings.row_px_day/30;
+  const daySlotPx = SLOT_MIN*dayPxPerMin;
+  const deltaY = e.clientY - drag.startY;
+  const slotDelta = Math.round(deltaY/daySlotPx);
+  if(drag.mode==="resize"){
+    const newDur = Math.max(SLOT_MIN, drag.origDuration + slotDelta*SLOT_MIN);
+    const cappedDur = Math.min(newDur, GRID_END_MIN - timeToMinutes(drag.origStart));
+    drag.blockEl.style.height = Math.max(cappedDur*dayPxPerMin-3,20)+"px";
+    drag.pendingDuration = cappedDur;
+  } else {
+    let newStartMin = timeToMinutes(drag.origStart) + slotDelta*SLOT_MIN;
+    newStartMin = Math.max(GRID_START_MIN, Math.min(newStartMin, GRID_END_MIN-SLOT_MIN));
+    drag.pendingStart = minutesToTime(newStartMin);
+    const under = document.elementFromPoint(e.clientX, e.clientY);
+    const col = under ? under.closest(".emp-track") : null;
+    if(col && col.dataset.emp) drag.pendingEmployee = col.dataset.emp;
+    if(!drag.ghost){ drag.ghost = document.createElement("div"); drag.ghost.className="drop-ghost"; drag.blockEl.style.visibility="hidden"; }
+    if(drag.hoverEl !== col){
+      if(drag.ghost.parentNode) drag.ghost.parentNode.removeChild(drag.ghost);
+      if(col) col.appendChild(drag.ghost);
+      drag.hoverEl = col;
+    }
+    if(drag.ghost.parentNode){
+      drag.ghost.style.top = (16+(newStartMin-GRID_START_MIN)*dayPxPerMin)+"px";
+      drag.ghost.style.height = Math.max(drag.origDuration*dayPxPerMin-3,20)+"px";
+    }
+    drag.ghost.classList.toggle("copy-mode", !!e.altKey);
+  }
+}
+async function createCopyAt(item, changedFields){
+  const base = Object.assign({}, itemDataFields(item), changedFields);
+  const split = computeLunchTrim(base.item_type, base.start_time, base.duration_minutes);
+  if(!split){
+    const row = await Items.create(base); state.items.push(row);
+  } else if(!split.splitInTwo){
+    const row = await Items.create(Object.assign({}, base, split.shifted)); state.items.push(row);
+  } else {
+    await withUndoBatch("kopiranje (Alt+povuci)", async ()=>{
+      const row1 = await Items.create(Object.assign({}, base, split.seg1)); state.items.push(row1);
+      const row2 = await Items.create(Object.assign({}, base, split.seg2)); state.items.push(row2);
+    });
+  }
+}
+async function onDragEnd(e){
+  document.removeEventListener("mousemove", onDragMove);
+  document.removeEventListener("mouseup", onDragEnd);
+  if(!drag) return;
+  const d = drag; drag=null;
+  d.blockEl.classList.remove("dragging");
+  d.blockEl.style.visibility="";
+  if(d.ghost && d.ghost.parentNode) d.ghost.parentNode.removeChild(d.ghost);
+  const item = state.items.find(x=>x.id===d.id);
+  if(!item){ if(d.ghost) suppressClickUntil = Date.now()+300; return; }
+  let payload={}, changed=false;
+  if(d.mode==="resize" && d.pendingDuration && d.pendingDuration!==d.origDuration){ payload.duration_minutes=d.pendingDuration; changed=true; }
+  if(d.mode==="move"){
+    if(d.pendingStart && d.pendingStart!==d.origStart){ payload.start_time=d.pendingStart; changed=true; }
+    if(d.pendingEmployee && d.pendingEmployee!==d.origEmployee){ payload.employee_id=d.pendingEmployee; changed=true; }
+  }
+  // svaka stvarna promjena (pomak ILI resize) mijenja layout ispod kursora, pa sljedeći "duh-klik" na
+  // prazan slot treba blokirati - ne samo kad je bio "ghost" (koji postoji samo kod pomicanja, ne resizea)
+  if(changed || d.ghost){ suppressClickUntil = Date.now()+300; }
+  if(!changed) return;
+  if(d.mode==="move" && e.altKey){
+    try{ await createCopyAt(item, payload); render(); showToast("Kopirano na novo mjesto — original je ostao netaknut."); }
+    catch(err){ showToast("Greška kod kopiranja: "+err.message); }
+    return;
+  }
+  try{ await applyChangeWithLunchSplit(item, payload); render(); }
+  catch(err){ showToast("Greška kod pomicanja: "+err.message); await loadVisibleItems(true); render(); }
+}
+/* ---- multi-day mini-board drag (precise time + day/employee move) ---- */
+function startMiniDrag(e, blockEl){
+  e.preventDefault();
+  const id = blockEl.dataset.id;
+  const item = state.items.find(x=>x.id===id);
+  if(!item) return;
+  const board = blockEl.closest(".mboard");
+  drag = { kind:"mini", id, blockEl, startX:e.clientX, startY:e.clientY, moved:false,
+    origStart:item.start_time, origDuration:item.duration_minutes, origEmployee:item.employee_id, origDate:item.item_date, slotPx: parseInt(board.dataset.slotpx) };
+  document.addEventListener("mousemove", onMiniDragMove);
+  document.addEventListener("mouseup", onMiniDragEnd);
+}
+function onMiniDragMove(e){
+  if(!drag || drag.kind!=="mini") return;
+  const dist = Math.hypot(e.clientX-drag.startX, e.clientY-drag.startY);
+  if(dist>4 && !drag.moved){
+    drag.moved=true;
+    drag.blockEl.style.visibility="hidden";
+    drag.ghost = document.createElement("div");
+    drag.ghost.className = "drop-ghost drop-ghost-mini";
+  }
+  if(!drag.moved) return;
+  const under = document.elementFromPoint(e.clientX, e.clientY);
+  const board = under ? under.closest(".mboard") : null;
+  if(drag.hoverEl !== board){
+    if(drag.ghost.parentNode) drag.ghost.parentNode.removeChild(drag.ghost);
+    if(board) board.appendChild(drag.ghost);
+    drag.hoverEl = board;
+  }
+  if(board){
+    drag.pendingEmployee = board.dataset.emp;
+    drag.pendingDate = board.dataset.date;
+    const rect = board.getBoundingClientRect();
+    const pad = parseInt(board.dataset.pad||"0");
+    const relY = e.clientY - rect.top - pad;
+    const slotPx = parseInt(board.dataset.slotpx);
+    const pxPerMin = slotPx/30;
+    let minuteOffset = Math.round((relY/pxPerMin)/SLOT_MIN)*SLOT_MIN;
+    minuteOffset = Math.max(0, Math.min(540-SLOT_MIN, minuteOffset));
+    drag.pendingStart = minutesToTime(GRID_START_MIN + minuteOffset);
+    if(drag.ghost.parentNode){
+      drag.ghost.style.top = (pad+minuteOffset*pxPerMin)+"px";
+      drag.ghost.style.height = Math.max(drag.origDuration*pxPerMin-1,9)+"px";
+    }
+    drag.ghost.classList.toggle("copy-mode", !!e.altKey);
+  }
+}
+async function onMiniDragEnd(e){
+  document.removeEventListener("mousemove", onMiniDragMove);
+  document.removeEventListener("mouseup", onMiniDragEnd);
+  if(!drag || drag.kind!=="mini") return;
+  const d = drag; drag=null;
+  d.blockEl.style.visibility="";
+  if(d.moved){ suppressClickUntil = Date.now()+300; }
+  if(d.ghost && d.ghost.parentNode) d.ghost.parentNode.removeChild(d.ghost);
+  if(!d.moved) return; // treat as a plain click; native click event opens edit modal
+  const item = state.items.find(x=>x.id===d.id);
+  if(!item) return;
+  const payload = {}; let changed=false;
+  if(d.pendingEmployee && d.pendingEmployee!==d.origEmployee){ payload.employee_id=d.pendingEmployee; changed=true; }
+  if(d.pendingDate && d.pendingDate!==d.origDate){ payload.item_date=d.pendingDate; changed=true; }
+  if(d.pendingStart && d.pendingStart!==d.origStart){ payload.start_time=d.pendingStart; changed=true; }
+  if(!changed) return;
+  if(e.altKey){
+    try{ await createCopyAt(item, payload); render(); showToast("Kopirano na novo mjesto — original je ostao netaknut."); }
+    catch(err){ showToast("Greška kod kopiranja: "+err.message); }
+    return;
+  }
+  try{ await applyChangeWithLunchSplit(item, payload); render(); }
+  catch(err){ showToast("Greška kod pomicanja: "+err.message); await loadVisibleItems(true); render(); }
+}
+function addItemFromBoardClick(boardEl, e){
+  const rect = boardEl.getBoundingClientRect();
+  const pad = parseInt(boardEl.dataset.pad||"0");
+  const relY = e.clientY - rect.top - pad;
+  const slotPx = parseInt(boardEl.dataset.slotpx);
+  const pxPerMin = slotPx/30;
+  let minuteOffset = Math.round((relY/pxPerMin)/SLOT_MIN)*SLOT_MIN;
+  minuteOffset = Math.max(0, Math.min(540-SLOT_MIN, minuteOffset));
+  const time = minutesToTime(GRID_START_MIN + minuteOffset);
+  openNewItem(boardEl.dataset.emp, boardEl.dataset.date, time);
+}
+
+/* ---- multi-day mini-block resize ---- */
+function startMiniResize(e, blockEl){
+  e.preventDefault();
+  const id = blockEl.dataset.id;
+  const item = state.items.find(x=>x.id===id);
+  if(!item) return;
+  const board = blockEl.closest(".mboard");
+  drag = { kind:"miniresize", id, blockEl, startY:e.clientY, origDuration:item.duration_minutes, origStart:item.start_time, slotPx: parseInt(board.dataset.slotpx) };
+  document.addEventListener("mousemove", onMiniResizeMove);
+  document.addEventListener("mouseup", onMiniResizeEnd);
+}
+function onMiniResizeMove(e){
+  if(!drag || drag.kind!=="miniresize") return;
+  const deltaY = e.clientY - drag.startY;
+  const pxPerMin = drag.slotPx/30;
+  const deltaMin = Math.round((deltaY/pxPerMin)/SLOT_MIN)*SLOT_MIN;
+  const newDur = Math.max(SLOT_MIN, drag.origDuration + deltaMin);
+  const capped = Math.min(newDur, GRID_END_MIN - timeToMinutes(drag.origStart));
+  drag.blockEl.style.height = Math.max(capped*pxPerMin - 1, 9)+"px";
+  drag.pendingDuration = capped;
+}
+async function onMiniResizeEnd(e){
+  document.removeEventListener("mousemove", onMiniResizeMove);
+  document.removeEventListener("mouseup", onMiniResizeEnd);
+  if(!drag || drag.kind!=="miniresize") return;
+  const d = drag; drag=null;
+  if(!d.pendingDuration || d.pendingDuration===d.origDuration) return;
+  suppressClickUntil = Date.now()+300; // resize je promijenio raspored ispod kursora - blokiraj sljedeći "duh-klik"
+  const item = state.items.find(x=>x.id===d.id);
+  if(!item) return;
+  try{ await applyChangeWithLunchSplit(item, {duration_minutes:d.pendingDuration}); render(); }
+  catch(err){ showToast("Greška kod promjene trajanja: "+err.message); await loadVisibleItems(true); render(); }
+}
+
+/* ---- report ---- */
+async function openReport(employeeId){
+  const [ws,we] = weekRangeOf(state.currentDate);
+  state.reportModal = { loading:true, employeeId, weekStart:ws, weekEnd:we, items:[] };
+  render();
+  try{
+    const items = await Items.listRange(ws,we);
+    state.reportModal.items = (items||[]).filter(it=>it.employee_id===employeeId);
+  }catch(err){ showToast("Greška kod izvještaja: "+err.message); state.reportModal.items=[]; }
+  state.reportModal.loading=false;
+  render();
+}
+function weekRangeOf(dateISO){
+  const d = new Date(dateISO+"T00:00:00");
+  const wd = (d.getDay()+6)%7;
+  const monday = addDays(d,-wd), sunday = addDays(monday,6);
+  return [fmtISO(monday), fmtISO(sunday)];
+}
+
+/* ---- month overview ---- */
+function weeksInMonth(year, month){
+  const first = new Date(year, month-1, 1);
+  const last = new Date(year, month, 0);
+  const weeks = [];
+  let d = addDays(first, -((first.getDay()+6)%7));
+  while(d<=last){
+    weeks.push({ start: fmtISO(d), end: fmtISO(addDays(d,6)) });
+    d = addDays(d,7);
+  }
+  return weeks;
+}
+async function openMonthOverview(scope, rangeStart){
+  const base = new Date(state.currentDate+"T00:00:00");
+  const year = base.getFullYear(), month = base.getMonth()+1;
+  scope = scope || "month";
+  let start, end;
+  if(scope==="week"){
+    if(rangeStart){ start = rangeStart; end = fmtISO(addDays(new Date(rangeStart+"T00:00:00"),6)); }
+    else { const wd=(base.getDay()+6)%7; start = fmtISO(addDays(base,-wd)); end = fmtISO(addDays(base,6-wd)); }
+  } else {
+    start = year+"-"+String(month).padStart(2,"0")+"-01";
+    const lastDay = new Date(year, month, 0).getDate();
+    end = year+"-"+String(month).padStart(2,"0")+"-"+String(lastDay).padStart(2,"0");
+  }
+  state.monthOverview = { loading:true, scope, year, month, rangeStart:start, rangeEnd:end, items:[] };
+  render();
+  try{
+    state.monthOverview.items = await Items.listRange(start,end) || [];
+  }catch(err){ showToast("Greška kod pregleda: "+err.message); state.monthOverview.items=[]; }
+  state.monthOverview.loading=false;
+  render();
+}
+async function switchOverviewScope(scope, rangeStart){
+  await openMonthOverview(scope, rangeStart);
+}
+function renderMonthOverviewModal(){
+  const st = state.monthOverview;
+  if(st.loading) return `<div class="overlay" data-act="close-overlay"><div class="modal wide" data-stop="1"><p>Učitavanje…</p></div></div>`;
+  const scopeLabel = st.scope==="week"
+    ? `${fmtDateShort(st.rangeStart)}–${fmtDateShort(st.rangeEnd)} ${st.year}.`
+    : `${MONTHS_HR[st.month-1]} ${st.year}.`;
+  const activeEmps = state.employees.filter(e=>e.active);
+
+  const empTotals = activeEmps.map(emp=>{
+    const items = st.items.filter(it=>it.employee_id===emp.id);
+    let work=0, vac=0;
+    items.forEach(it=>{ if(it.item_type==="vacation") vac+=it.duration_minutes; else work+=it.duration_minutes; });
+    return {emp, work, vac};
+  }).filter(x=>x.work>0 || x.vac>0).sort((a,b)=>b.work-a.work);
+  const grandTotal = empTotals.reduce((s,x)=>s+x.work,0);
+
+  const capacityStats = activeEmps.map(emp=>{
+    const { availableMin, vacationMin } = employeeRangeCapacity(emp.id, st.rangeStart, st.rangeEnd, st.items);
+    const bookedMin = st.items.filter(it=>it.employee_id===emp.id && it.item_type!=="vacation")
+      .reduce((s,it)=>s+effectiveWorkMinutes(it.start_time, it.duration_minutes), 0);
+    const freeMin = Math.max(0, availableMin-bookedMin);
+    const overMin = Math.max(0, bookedMin-availableMin);
+    const pct = availableMin>0 ? Math.round(bookedMin/availableMin*100) : (bookedMin>0 ? 999 : 0);
+    return { emp, availableMin, bookedMin, vacationMin, freeMin, overMin, pct };
+  }).filter(x=>x.availableMin>0 || x.bookedMin>0);
+  const teamAvailable = capacityStats.reduce((s,x)=>s+x.availableMin,0);
+  const teamBooked = capacityStats.reduce((s,x)=>s+x.bookedMin,0);
+  const teamPct = teamAvailable>0 ? Math.round(teamBooked/teamAvailable*100) : 0;
+
+  const taskMap = {};
+  st.items.filter(it=>it.item_type==="task").forEach(it=>{
+    const k = it.task_number||"(bez broja)";
+    taskMap[k] = (taskMap[k]||0)+it.duration_minutes;
+  });
+  const taskRows = Object.entries(taskMap).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const maxTask = Math.max(1, ...taskRows.map(([,m])=>m));
+
+  const dayMap = {};
+  st.items.forEach(it=>{ if(it.item_type!=="vacation") dayMap[it.item_date]=(dayMap[it.item_date]||0)+it.duration_minutes; });
+  const vacDays = new Set(st.items.filter(it=>it.item_type==="vacation").map(it=>it.item_date));
+  const maxDay = Math.max(1, ...Object.values(dayMap));
+
+  const capBars = capacityStats.map(x=>{
+    const fillPct = Math.min(100, x.pct);
+    const overPct = x.pct>100 ? Math.min(40, x.pct-100) : 0;
+    return `<div class="barrow cap-row">
+      <div class="barrow-label"><span class="col-dot" style="background:${x.emp.color}"></span>${escapeHtml(x.emp.name)}</div>
+      <div class="barrow-track">
+        <div class="barrow-fill" style="width:${fillPct}%;background:${x.emp.color}"></div>
+        ${overPct>0?`<div class="barrow-over" style="width:${overPct}%"></div>`:""}
+      </div>
+      <div class="barrow-val ${x.pct>100?'over':''}">${x.pct}%</div>
+    </div>
+    <div class="cap-subline">${minutesToHM(x.bookedMin)} od ${minutesToHM(x.availableMin)} dostupno${x.vacationMin?` · ${minutesToHM(x.vacationMin)} godišnji`:""}${x.overMin?` · <span class="over-text">${minutesToHM(x.overMin)} preko</span>`:(x.freeMin?` · ${minutesToHM(x.freeMin)} slobodno`:"")}</div>`;
+  }).join("") || `<p class="mo-empty">Nema podataka za ovaj mjesec.</p>`;
+
+  const taskBars = taskRows.map(([k,m])=>`
+    <div class="barrow">
+      <div class="barrow-label mono">${escapeHtml(k)}</div>
+      <div class="barrow-track"><div class="barrow-fill" style="width:${(m/maxTask*100).toFixed(1)}%;background:var(--accent)"></div></div>
+      <div class="barrow-val">${minutesToHM(m)}</div>
+    </div>`).join("") || `<p class="mo-empty">Nema taskova ovaj mjesec.</p>`;
+
+  let heatCells = "";
+  let heatDowLabels = DAYS_HR_SHORT;
+  if(st.scope==="week"){
+    for(let i=0;i<7;i++){
+      const dISO = fmtISO(addDays(new Date(st.rangeStart+"T00:00:00"), i));
+      const dayNum = new Date(dISO+"T00:00:00").getDate();
+      const mins = dayMap[dISO]||0;
+      const hol = holidayName(dISO); const weekend = isWeekend(dISO);
+      const intensity = mins/maxDay;
+      const bg = mins===0 ? ((hol||weekend)?"var(--muted-bg)":"var(--row-bg-b)") : `rgba(0,160,59,${(0.15+intensity*0.75).toFixed(2)})`;
+      const txtColor = intensity>0.55 ? "#fff" : "inherit";
+      heatCells += `<div class="heat-cell" style="background:${bg};color:${txtColor}">
+        <div class="heat-daynum">${dayNum}</div>
+        ${mins>0?`<div class="heat-hours">${minutesToHM(mins)}</div>`:""}
+        ${vacDays.has(dISO)?`<div class="heat-vac">${icon('sun',9)}</div>`:""}
+      </div>`;
+    }
+  } else {
+    const firstOfMonth = new Date(st.year, st.month-1, 1);
+    const startOffset = (firstOfMonth.getDay()+6)%7;
+    const daysInMonth = new Date(st.year, st.month, 0).getDate();
+    const totalCells = Math.ceil((startOffset+daysInMonth)/7)*7;
+    for(let i=0;i<totalCells;i++){
+      const dayNum = i-startOffset+1;
+      if(dayNum<1||dayNum>daysInMonth){ heatCells += `<div class="heat-cell empty"></div>`; continue; }
+      const dISO = st.year+"-"+String(st.month).padStart(2,"0")+"-"+String(dayNum).padStart(2,"0");
+      const mins = dayMap[dISO]||0;
+      const hol = holidayName(dISO); const weekend = isWeekend(dISO);
+      const intensity = mins/maxDay;
+      const bg = mins===0 ? ((hol||weekend)?"var(--muted-bg)":"var(--row-bg-b)") : `rgba(0,160,59,${(0.15+intensity*0.75).toFixed(2)})`;
+      const txtColor = intensity>0.55 ? "#fff" : "inherit";
+      heatCells += `<div class="heat-cell" style="background:${bg};color:${txtColor}">
+        <div class="heat-daynum">${dayNum}</div>
+        ${mins>0?`<div class="heat-hours">${minutesToHM(mins)}</div>`:""}
+        ${vacDays.has(dISO)?`<div class="heat-vac">${icon('sun',9)}</div>`:""}
+      </div>`;
+    }
+  }
+
+  const detailSections = activeEmps.map(emp=>{
+    const items = st.items.filter(it=>it.employee_id===emp.id);
+    const taskMap2={}; let internalMin=0, vacationMin=0;
+    items.forEach(it=>{
+      if(it.item_type==="task"){ const k=it.task_number||"(bez broja)"; taskMap2[k]=(taskMap2[k]||0)+it.duration_minutes; }
+      else if(it.item_type==="internal_dev") internalMin+=it.duration_minutes;
+      else if(it.item_type==="vacation") vacationMin+=it.duration_minutes;
+    });
+    const rows = Object.entries(taskMap2).sort((a,b)=>b[1]-a[1]);
+    const total = rows.reduce((s,[,m])=>s+m,0)+internalMin;
+    if(rows.length===0 && !internalMin && !vacationMin) return "";
+    return `<div class="mo-emp-detail">
+      <div class="mo-emp-name"><span class="col-dot" style="background:${emp.color}"></span>${escapeHtml(emp.name)}</div>
+      <table class="rep"><thead><tr><th>Task</th><th style="text-align:right">Sati</th></tr></thead><tbody>
+        ${rows.map(([k,m])=>`<tr><td class="mono">${escapeHtml(k)}</td><td style="text-align:right">${minutesToHM(m)}</td></tr>`).join("")}
+        ${internalMin?`<tr><td>Interni razvoj</td><td style="text-align:right">${minutesToHM(internalMin)}</td></tr>`:""}
+        <tr class="total"><td>Ukupno</td><td style="text-align:right">${minutesToHM(total)}</td></tr>
+        ${vacationMin?`<tr><td>Godišnji odmor</td><td style="text-align:right">${minutesToHM(vacationMin)}</td></tr>`:""}
+      </tbody></table>
+    </div>`;
+  }).join("") || `<p class="mo-empty">Nema unosa za ovaj mjesec.</p>`;
+
+  const weeks = weeksInMonth(st.year, st.month);
+  const scopeSwitcher = `<div class="mo-scope-row" data-noprint="1">
+    <div class="seg">
+      <button class="${st.scope==='week'?'active':''}" data-act="mo-scope" data-scope="week">Tjedan</button>
+      <button class="${st.scope==='month'?'active':''}" data-act="mo-scope" data-scope="month">Mjesec</button>
+    </div>
+    ${st.scope==='week' ? `<div class="mo-week-picker">
+      ${weeks.map(w=>`<button class="mo-week-btn ${w.start===st.rangeStart?'active':''}" data-act="mo-pick-week" data-start="${w.start}">${fmtDateShort(w.start)}–${fmtDateShort(w.end)}</button>`).join("")}
+    </div>` : ""}
+  </div>`;
+
+  return `<div class="overlay" data-act="close-overlay">
+    <div class="modal xwide" data-stop="1">
+      ${scopeSwitcher}
+      <div id="printArea" data-print-date="${new Date().toLocaleDateString('hr-HR')}"><div class="pdf-brandhead">RASPORED — DIZAJN TIM</div>
+        <div class="report-head"><h2>Pregled — ${scopeLabel}</h2><div class="report-sub">Ukupno radnih sati: ${minutesToHM(grandTotal)}</div></div>
+
+        <h4 class="mo-section-title">Iskorištenost resursa (7h dostupno po radnom danu)</h4>
+        <div class="capacity-summary">
+          <div class="cap-stat"><div class="cap-val">${minutesToHM(teamBooked)}</div><div class="cap-lbl">Iskorišteno</div></div>
+          <div class="cap-stat"><div class="cap-val">${minutesToHM(Math.max(0,teamAvailable-teamBooked))}</div><div class="cap-lbl">Slobodno</div></div>
+          <div class="cap-stat"><div class="cap-val ${teamPct>100?'over-text':''}">${teamPct}%</div><div class="cap-lbl">Popunjenost tima</div></div>
+        </div>
+        <div class="barchart">${capBars}</div>
+
+        <h4 class="mo-section-title">Najviše sati po tasku</h4>
+        <div class="barchart">${taskBars}</div>
+
+        <h4 class="mo-section-title">Opterećenje po danu</h4>
+        <div class="heat-grid">
+          ${DAYS_HR_SHORT.map(d=>`<div class="heat-dow">${d}</div>`).join("")}
+          ${heatCells}
+        </div>
+
+        <details class="mo-details">
+          <summary>Detaljna razrada po zaposleniku i tasku</summary>
+          ${detailSections}
+        </details>
+        <div class="pdf-brandfoot">Generirano ${new Date().toLocaleDateString('hr-HR')}</div>
+      </div>
+      <div class="pdf-hint">PDF se automatski preuzima na tvoje računalo.</div>
+      <div class="modal-actions"><div></div><div class="right"><button class="btn" data-act="close-overlay">Zatvori</button><button class="btn btn-primary" data-act="print-report" data-filename="Pregled-${scopeLabel.replace(/\s+/g,'-').replace(/\./g,'')}">${icon("printer",13)} Izvezi kao PDF</button></div></div>
+    </div>
+  </div>`;
+}
+
+const BUILD_ID = "2026-09-01 07:15 UTC";
+console.log("Raspored build:", BUILD_ID);
+document.addEventListener("DOMContentLoaded", ()=>{
+  const tag = document.createElement("div");
+  tag.textContent = "build " + BUILD_ID;
+  tag.style.cssText = "position:fixed;bottom:2px;right:6px;font-size:9px;color:#c7cbd3;z-index:999;pointer-events:none;font-family:monospace;";
+  document.body.appendChild(tag);
+});
+boot();
+</script>
+</body>
+</html>
