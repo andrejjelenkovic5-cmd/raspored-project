@@ -2118,11 +2118,14 @@ function bindEvents(){
   if(!window._externalLinkOpenerBound){
     window._externalLinkOpenerBound = true;
     document.addEventListener("click", (e)=>{
-      if(!window.__TAURI__ || !window.__TAURI__.opener) return; // samo unutar desktop (Tauri) app-a
+      if(!window.__TAURI__ || !window.__TAURI__.core) return; // samo unutar desktop (Tauri) app-a
       const a = e.target.closest("a.hp-link, a.flag-link");
       if(!a || !a.href) return;
       e.preventDefault();
-      window.__TAURI__.opener.open(a.href).catch(err=>console.error("Otvaranje linka nije uspjelo:", err));
+      window.__TAURI__.core.invoke("open_external_link", { url: a.href }).catch(err=>{
+        console.error("Otvaranje linka nije uspjelo:", err);
+        showToast("Nije uspjelo otvaranje linka: "+(err.message||err));
+      });
     });
   }
   if(!window._ctxMenuCloseBound){
@@ -3398,7 +3401,7 @@ function renderMonthOverviewModal(){
   </div>`;
 }
 
-const BUILD_ID = "2026-09-01 18:05 UTC";
+const BUILD_ID = "2026-09-01 18:40 UTC";
 console.log("Raspored build:", BUILD_ID);
 document.addEventListener("DOMContentLoaded", ()=>{
   const tag = document.createElement("div");
