@@ -139,7 +139,7 @@ input,select,textarea{font-family:inherit;font-size:14px;}
 .item-done-btn{position:absolute;top:4px;right:23px;width:17px;height:17px;border-radius:5px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.9);color:#00822F;opacity:0;transition:opacity .12s;cursor:pointer;z-index:4;box-shadow:0 1px 3px rgba(0,0,0,.18);}
 .item-block:hover .item-done-btn, .mb-block:hover .item-done-btn{opacity:1;}
 .item-done-btn:hover{background:var(--surface);}
-.item-block.is-done, .mb-block.is-done{background:var(--surface) !important; opacity:1; border-width:2px;}
+.item-block.is-done, .mb-block.is-done{background:var(--muted-bg) !important; opacity:1; border-width:2px; border-color:#00A03B !important;}
 .item-block.is-done .it-title, .mb-block.is-done .mbt, .item-block.is-done .it-titletime, .mb-block.is-done .mb-time-inline{color:var(--text-3) !important; text-decoration:line-through;}
 .mb-block .item-done-btn{top:2px;right:20px;width:14px;height:14px;}
 .item-block:hover .item-del, .mb-block:hover .item-del{opacity:1;}
@@ -178,7 +178,7 @@ input,select,textarea{font-family:inherit;font-size:14px;}
 
 /* ---- OVERVIEW VIEW ---- */
 :root{ --ov-low:#8FDDAE; --ov-mid:#FFCF5C; --ov-high:#FF9F5A; --ov-over:#F4574A; --ov-vacation:#B9A3E3; }
-.ov-wrap{display:flex;height:calc(100vh - 130px);min-height:560px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow);overflow:hidden;width:100vw;position:relative;left:50%;transform:translateX(-50%);}
+.ov-wrap{display:flex;height:calc(100vh - 130px);min-height:560px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow);overflow:hidden;}
 .ov-sidebar{width:220px;flex-shrink:0;background:var(--surface-2);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:14px 12px;}
 .ov-sidebar h2{font-size:12px;font-weight:800;color:var(--text-2);margin:0 0 10px;padding:0 2px;}
 .ov-emp-list{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:2px;}
@@ -2275,18 +2275,26 @@ function closeAllModals(){ state.employeeModalOpen=false; state.itemModal=null; 
    iframe, corrupt PNG, prazan canvas) jer canvas uopće nije uključen -
    PDF je pravi tekst, pretraživ, i identično radi u svakom browseru.
    ========================================================= */
+// jsPDF-ovi ugradjeni fontovi (helvetica i sl.) NE podrzavaju hrvatska slova c/c/s/dj/z (nisu dio
+// WinAnsi kodiranja), pa bi se inace krivo prikazala/izgubila u PDF-u. Dok ne ugradimo poseban font,
+// najpouzdanije rjesenje je zamijeniti ih ASCII inacicama - citljivo, bez artefakata.
+function pdfSafe(str){
+  if(str==null) return "";
+  const map = {"č":"c","ć":"c","š":"s","đ":"dj","ž":"z","Č":"C","Ć":"C","Š":"S","Đ":"Dj","Ž":"Z"};
+  return String(str).replace(/[čćšđžČĆŠĐŽ]/g, ch=>map[ch]||ch);
+}
 function pdfHeader(pdf, marginL, pageW, title, subtitle){
   pdf.setFont("helvetica","bold"); pdf.setFontSize(9);
   pdf.setTextColor(0,130,47);
-  pdf.text("RASPORED — DIZAJN TIM", marginL, 15);
+  pdf.text("RASPORED - DIZAJN TIM", marginL, 15);
   pdf.setDrawColor(0,160,59); pdf.setLineWidth(0.4);
   pdf.line(marginL, 18, pageW-marginL, 18);
   pdf.setTextColor(30,30,30);
   pdf.setFont("helvetica","bold"); pdf.setFontSize(15);
-  pdf.text(title, marginL, 28);
+  pdf.text(pdfSafe(title), marginL, 28);
   pdf.setFont("helvetica","normal"); pdf.setFontSize(10);
   pdf.setTextColor(120,120,120);
-  pdf.text(subtitle, marginL, 34);
+  pdf.text(pdfSafe(subtitle), marginL, 34);
   pdf.setTextColor(30,30,30);
   return 42;
 }
@@ -2298,7 +2306,7 @@ function pdfFooter(pdf, marginL, pageW, pageH){
     pdf.line(marginL, pageH-14, pageW-marginL, pageH-14);
     pdf.setFont("helvetica","normal"); pdf.setFontSize(8);
     pdf.setTextColor(150,150,150);
-    pdf.text("Generirano "+new Date().toLocaleDateString("hr-HR"), marginL, pageH-9);
+    pdf.text(pdfSafe("Generirano "+new Date().toLocaleDateString("hr-HR")), marginL, pageH-9);
     pdf.text(String(i)+" / "+pages, pageW-marginL, pageH-9, {align:"right"});
     pdf.setTextColor(30,30,30);
   }
@@ -2319,7 +2327,7 @@ function pdfTable(pdf, opts){
   let cx = opts.x;
   opts.header.forEach((h,i)=>{
     const align = (opts.colAligns&&opts.colAligns[i])||"left";
-    pdf.text(String(h), align==="right"?cx+opts.colWidths[i]-2:cx+2, y, {align:align==="right"?"right":"left"});
+    pdf.text(pdfSafe(h), align==="right"?cx+opts.colWidths[i]-2:cx+2, y, {align:align==="right"?"right":"left"});
     cx += opts.colWidths[i];
   });
   y += rowH;
@@ -2331,7 +2339,7 @@ function pdfTable(pdf, opts){
     let cx2 = opts.x;
     row.forEach((cell,i)=>{
       const align = (opts.colAligns&&opts.colAligns[i])||"left";
-      pdf.text(String(cell), align==="right"?cx2+opts.colWidths[i]-2:cx2+2, y, {align:align==="right"?"right":"left"});
+      pdf.text(pdfSafe(cell), align==="right"?cx2+opts.colWidths[i]-2:cx2+2, y, {align:align==="right"?"right":"left"});
       cx2 += opts.colWidths[i];
     });
     if(row._bold) pdf.setFont("helvetica","normal");
@@ -2379,10 +2387,23 @@ function buildWeeklyReportPdf(filenameBase){
   pdf.save(filenameBase.replace(/[^a-zA-Z0-9čćšđžČĆŠĐŽ_-]+/g,"-") + ".pdf");
 }
 
+function hexToRgbArr(hex){
+  hex = (hex||"#999999").replace("#","");
+  if(hex.length!==6) return [153,153,153];
+  return [parseInt(hex.substr(0,2),16), parseInt(hex.substr(2,2),16), parseInt(hex.substr(4,2),16)];
+}
+function greenIntensityColor(intensity){
+  intensity = Math.max(0, Math.min(1, intensity));
+  return [
+    Math.round(255 + (0-255)*intensity),
+    Math.round(255 + (160-255)*intensity),
+    Math.round(255 + (59-255)*intensity),
+  ];
+}
 function buildMonthOverviewPdf(filenameBase){
   const st = state.monthOverview;
   const scopeLabel = st.scope==="week"
-    ? fmtDateShort(st.rangeStart)+"–"+fmtDateShort(st.rangeEnd)+" "+st.year+"."
+    ? fmtDateShort(st.rangeStart)+"-"+fmtDateShort(st.rangeEnd)+" "+st.year+"."
     : MONTHS_HR[st.month-1]+" "+st.year+".";
   const activeEmps = state.employees.filter(e=>e.active);
 
@@ -2390,36 +2411,136 @@ function buildMonthOverviewPdf(filenameBase){
     const { availableMin, vacationMin } = employeeRangeCapacity(emp.id, st.rangeStart, st.rangeEnd, st.items);
     const bookedMin = st.items.filter(it=>it.employee_id===emp.id && it.item_type!=="vacation")
       .reduce((s,it)=>s+effectiveWorkMinutes(it.start_time, it.duration_minutes), 0);
+    const freeMin = Math.max(0, availableMin-bookedMin);
+    const overMin = Math.max(0, bookedMin-availableMin);
     const pct = availableMin>0 ? Math.round(bookedMin/availableMin*100) : (bookedMin>0 ? 999 : 0);
-    return { emp, availableMin, bookedMin, vacationMin, pct };
-  }).filter(x=>x.availableMin>0 || x.bookedMin>0);
+    return { emp, availableMin, bookedMin, vacationMin, freeMin, overMin, pct };
+  }).filter(x=>x.availableMin>0 || x.bookedMin>0).sort((a,b)=>b.pct-a.pct);
 
   const taskMap = {};
   st.items.filter(it=>it.item_type==="task").forEach(it=>{
     const k = it.task_number||"(bez broja)";
     taskMap[k] = (taskMap[k]||0)+it.duration_minutes;
   });
-  const taskRows = Object.entries(taskMap).sort((a,b)=>b[1]-a[1]).slice(0,15);
+  const taskRows = Object.entries(taskMap).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const maxTask = Math.max(1, ...taskRows.map(([,m])=>m));
+
+  const dayMap = {};
+  st.items.forEach(it=>{ if(it.item_type!=="vacation") dayMap[it.item_date]=(dayMap[it.item_date]||0)+it.duration_minutes; });
+  const maxDay = Math.max(1, ...Object.values(dayMap));
 
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF("p","mm","a4");
   const pageW = pdf.internal.pageSize.getWidth(), pageH = pdf.internal.pageSize.getHeight();
-  const marginL = 15;
-  let y = pdfHeader(pdf, marginL, pageW, "Pregled — "+scopeLabel, activeEmps.length+" aktivnih zaposlenika");
+  const marginL = 15, marginR = 15, marginB = 20;
+  let y = pdfHeader(pdf, marginL, pageW, "Pregled - "+scopeLabel, activeEmps.length+" aktivnih zaposlenika");
+  function ensureSpace(need){ if(y+need > pageH-marginB){ pdf.addPage(); y = 20; } }
 
-  pdf.setFont("helvetica","bold"); pdf.setFontSize(11); pdf.text("Iskorištenost kapaciteta", marginL, y); y+=5;
-  const capRows = capacityStats.length
-    ? capacityStats.map(x=>[x.emp.name, minutesToHM(x.bookedMin), minutesToHM(x.availableMin), x.pct+"%"+(x.vacationMin?" ("+minutesToHM(x.vacationMin)+" god.)":"")])
-    : [["Nema podataka za ovo razdoblje","","",""]];
-  y = pdfTable(pdf, {x:marginL, y, pageH, colWidths:[60,35,35,pageW-2*marginL-130], colAligns:["left","right","right","right"], header:["Zaposlenik","Rezervirano","Dostupno","Popunjenost"], rows:capRows});
+  // ---- Iskoristenost kapaciteta (vizualne trake, kao na ekranu) ----
+  ensureSpace(10);
+  pdf.setFont("helvetica","bold"); pdf.setFontSize(11); pdf.setTextColor(30,30,30);
+  pdf.text("Iskoristenost kapaciteta", marginL, y); y += 7;
+  if(!capacityStats.length){
+    pdf.setFont("helvetica","normal"); pdf.setFontSize(9); pdf.setTextColor(130,130,130);
+    pdf.text("Nema podataka za ovo razdoblje.", marginL, y); y += 8;
+  } else {
+    const barW = pageW - marginL - marginR - 45;
+    capacityStats.forEach(x=>{
+      ensureSpace(13);
+      pdf.setFont("helvetica","bold"); pdf.setFontSize(8.5); pdf.setTextColor(40,40,40);
+      pdf.text(pdfSafe(x.emp.name), marginL, y);
+      const barY = y+1.8, barH = 4;
+      pdf.setFillColor(238,239,242);
+      pdf.roundedRect(marginL, barY, barW, barH, 1, 1, "F");
+      const rgb = hexToRgbArr(x.emp.color);
+      const fillW = x.pct>0 ? Math.max(barW*Math.min(100,x.pct)/100, 2) : 0;
+      if(fillW>0){ pdf.setFillColor(rgb[0],rgb[1],rgb[2]); pdf.roundedRect(marginL, barY, fillW, barH, 1, 1, "F"); }
+      if(x.pct>100){
+        pdf.setFillColor(224,60,60);
+        const overW = Math.min(barW*0.12+2, barW);
+        pdf.rect(Math.max(marginL, marginL+barW-overW), barY, overW, barH, "F");
+      }
+      pdf.setFont("helvetica","bold"); pdf.setFontSize(8.5);
+      pdf.setTextColor(x.pct>100?210:40, 40, 40);
+      pdf.text(x.pct+"%", marginL+barW+4, y);
+      const subtext = minutesToHM(x.bookedMin)+" od "+minutesToHM(x.availableMin)+" dostupno"
+        + (x.vacationMin?" - "+minutesToHM(x.vacationMin)+" godisnji":"")
+        + (x.overMin ? " - "+minutesToHM(x.overMin)+" preko" : (x.freeMin?" - "+minutesToHM(x.freeMin)+" slobodno":""));
+      pdf.setFont("helvetica","normal"); pdf.setFontSize(7); pdf.setTextColor(130,130,130);
+      pdf.text(pdfSafe(subtext), marginL, y+6.5);
+      pdf.setTextColor(30,30,30);
+      y += 11.5;
+    });
+  }
 
-  y += 10;
-  pdf.setFont("helvetica","bold"); pdf.setFontSize(11); pdf.text("Najviše radnih sati po tasku", marginL, y); y+=5;
-  const taskTableRows = taskRows.length ? taskRows.map(([k,m])=>[k, minutesToHM(m)]) : [["Nema taskova u ovom razdoblju",""]];
-  pdfTable(pdf, {x:marginL, y, pageH, colWidths:[pageW-2*marginL-40,40], colAligns:["left","right"], header:["Task","Sati"], rows:taskTableRows});
+  // ---- Najvise radnih sati po tasku (vizualne trake) ----
+  y += 5; ensureSpace(10);
+  pdf.setFont("helvetica","bold"); pdf.setFontSize(11); pdf.setTextColor(30,30,30);
+  pdf.text("Najvise radnih sati po tasku", marginL, y); y += 7;
+  if(!taskRows.length){
+    pdf.setFont("helvetica","normal"); pdf.setFontSize(9); pdf.setTextColor(130,130,130);
+    pdf.text("Nema taskova u ovom razdoblju.", marginL, y); y += 8;
+  } else {
+    const barW2 = pageW - marginL - marginR - 35;
+    taskRows.forEach(([k,m])=>{
+      ensureSpace(8);
+      pdf.setFont("helvetica","normal"); pdf.setFontSize(8); pdf.setTextColor(40,40,40);
+      pdf.text(pdfSafe(k), marginL, y);
+      const barY = y+1.8, barH = 3.5;
+      pdf.setFillColor(238,239,242);
+      pdf.roundedRect(marginL, barY, barW2, barH, 1, 1, "F");
+      const w = Math.max(barW2*(m/maxTask), 2);
+      pdf.setFillColor(0,160,59);
+      pdf.roundedRect(marginL, barY, w, barH, 1, 1, "F");
+      pdf.setFont("helvetica","bold"); pdf.setFontSize(8); pdf.setTextColor(40,40,40);
+      pdf.text(minutesToHM(m), marginL+barW2+3, y);
+      y += 7.5;
+    });
+  }
+
+  // ---- Toplinska mapa - radni sati po danu ----
+  y += 5;
+  const daysList = st.scope==="week"
+    ? Array.from({length:7},(_,i)=>fmtISO(addDays(new Date(st.rangeStart+"T00:00:00"), i)))
+    : Array.from({length:new Date(st.year, st.month, 0).getDate()},(_,i)=>st.year+"-"+String(st.month).padStart(2,"0")+"-"+String(i+1).padStart(2,"0"));
+  ensureSpace(24);
+  pdf.setFont("helvetica","bold"); pdf.setFontSize(11); pdf.setTextColor(30,30,30);
+  pdf.text("Radni sati po danu", marginL, y); y += 7;
+  const cellsPerRow = 7, cellGap = 1.3;
+  const totalCellW = pageW-marginL-marginR;
+  const cellW = (totalCellW-(cellsPerRow-1)*cellGap)/cellsPerRow;
+  const cellH = 13;
+  const startPad = st.scope==="week" ? 0 : (new Date(st.year, st.month-1, 1).getDay()+6)%7;
+  let colIdx = 0, cursorX = marginL, cursorY = y;
+  for(let i=0;i<startPad;i++){ cursorX += cellW+cellGap; colIdx++; }
+  daysList.forEach((dISO)=>{
+    if(colIdx>=cellsPerRow){
+      colIdx=0; cursorX=marginL; cursorY+=cellH+cellGap;
+      if(cursorY+cellH > pageH-marginB){ pdf.addPage(); cursorY = 20; }
+    }
+    const mins = dayMap[dISO]||0;
+    const hol = holidayName(dISO); const weekend = isWeekend(dISO);
+    const dayNum = parseInt(dISO.slice(-2));
+    const intensity = mins/maxDay;
+    const fillColor = mins===0 ? ((hol||weekend)?[228,230,233]:[248,249,250]) : greenIntensityColor(0.2+intensity*0.7);
+    pdf.setDrawColor(222,224,228); pdf.setLineWidth(0.15);
+    pdf.setFillColor(fillColor[0],fillColor[1],fillColor[2]);
+    pdf.rect(cursorX, cursorY, cellW, cellH, "FD");
+    const lightText = mins>0 && intensity>0.55;
+    pdf.setFont("helvetica","bold"); pdf.setFontSize(7);
+    pdf.setTextColor(lightText?255:110, lightText?255:110, lightText?255:110);
+    pdf.text(String(dayNum), cursorX+1.5, cursorY+4.5);
+    if(mins>0){
+      pdf.setFont("helvetica","normal"); pdf.setFontSize(6.2);
+      pdf.text(minutesToHM(mins), cursorX+1.5, cursorY+9.5);
+    }
+    pdf.setTextColor(30,30,30);
+    cursorX += cellW+cellGap; colIdx++;
+  });
+  y = cursorY+cellH+8;
 
   pdfFooter(pdf, marginL, pageW, pageH);
-  pdf.save(filenameBase.replace(/[^a-zA-Z0-9čćšđžČĆŠĐŽ_-]+/g,"-") + ".pdf");
+  pdf.save(pdfSafe(filenameBase).replace(/[^a-zA-Z0-9_-]+/g,"-") + ".pdf");
 }
 
 async function exportPdf(filenameBase){
@@ -2454,13 +2575,13 @@ function bindScheduleAreaEvents(){
   const root = document.getElementById("scheduleArea");
   if(!root) return;
   root.querySelectorAll(".item-block").forEach(block=>{
-    block.addEventListener("mousedown",(e)=>{ if(e.button!==0 || e.target.dataset.act==="resize-handle" || e.target.closest(".hover-popup") || e.target.closest(".item-del") || e.target.closest(".item-done-btn")) return; startDrag(e, block, "move"); });
+    block.addEventListener("mousedown",(e)=>{ if(e.button!==0 || e.target.dataset.act==="resize-handle" || e.target.closest(".hover-popup") || e.target.closest(".item-del") || e.target.closest(".item-done-btn") || e.target.closest(".flag-link")) return; startDrag(e, block, "move"); });
   });
   root.querySelectorAll(".resize-handle").forEach(h=>{
     h.addEventListener("mousedown",(e)=>{ if(e.button!==0) return; e.stopPropagation(); startDrag(e, h.closest(".item-block"), "resize"); });
   });
   root.querySelectorAll(".mb-block").forEach(b=>{
-    b.addEventListener("mousedown",(e)=>{ if(e.button!==0 || e.target.closest(".link-flag") || e.target.closest(".mb-resize") || e.target.closest(".hover-popup") || e.target.closest(".item-del") || e.target.closest(".item-done-btn")) return; startMiniDrag(e, b); });
+    b.addEventListener("mousedown",(e)=>{ if(e.button!==0 || e.target.closest(".flag-link") || e.target.closest(".mb-resize") || e.target.closest(".hover-popup") || e.target.closest(".item-del") || e.target.closest(".item-done-btn")) return; startMiniDrag(e, b); });
   });
   root.querySelectorAll(".mb-resize").forEach(h=>{
     h.addEventListener("mousedown",(e)=>{ if(e.button!==0) return; e.stopPropagation(); startMiniResize(e, h.closest(".mb-block")); });
@@ -3237,7 +3358,7 @@ function renderMonthOverviewModal(){
   </div>`;
 }
 
-const BUILD_ID = "2026-09-01 07:15 UTC";
+const BUILD_ID = "2026-09-01 14:10 UTC";
 console.log("Raspored build:", BUILD_ID);
 document.addEventListener("DOMContentLoaded", ()=>{
   const tag = document.createElement("div");
