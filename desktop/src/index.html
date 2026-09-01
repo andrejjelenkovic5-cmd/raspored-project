@@ -3367,6 +3367,21 @@ document.addEventListener("DOMContentLoaded", ()=>{
   document.body.appendChild(tag);
 });
 boot();
+
+/* ---- automatsko azuriranje - radi SAMO unutar desktop (Tauri) app-a, na webu se tiho preskace ---- */
+if(window.__TAURI__ && window.__TAURI__.updater){
+  (async ()=>{
+    try{
+      const update = await window.__TAURI__.updater.check();
+      if(update){
+        showToast("Dostupna je novija verzija ("+update.version+") — preuzimam...");
+        await update.downloadAndInstall();
+        showToast("Azurirano! Ponovno pokrecem aplikaciju...");
+        await window.__TAURI__.process.relaunch();
+      }
+    }catch(e){ console.error("Provjera azuriranja nije uspjela:", e); }
+  })();
+}
 </script>
 </body>
 </html>
