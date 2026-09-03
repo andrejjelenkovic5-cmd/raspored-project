@@ -48,7 +48,7 @@
 html,body{margin:0;padding:0;}
 body{background:var(--bg);color:var(--text);font-family:'Manrope',system-ui,sans-serif;font-size:14px;line-height:1.4;-webkit-font-smoothing:antialiased;}
 .mono{font-family:'JetBrains Mono',ui-monospace,monospace;}
-#app{max-width:1500px;margin:0 auto;padding:20px 24px 60px;}
+#app{width:100%;margin:0 auto;padding:20px 24px 60px;box-sizing:border-box;}
 button{font-family:inherit;cursor:pointer;}
 input,select,textarea{font-family:inherit;font-size:14px;}
 
@@ -86,6 +86,15 @@ input,select,textarea{font-family:inherit;font-size:14px;}
 .emp-filter-dd{position:relative;}
 .emp-filter-panel{position:absolute;top:38px;left:0;background:var(--surface);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow-lg);padding:8px;min-width:220px;z-index:50;max-height:320px;overflow-y:auto;}
 .initials-popover{position:absolute;top:38px;right:0;background:var(--surface);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow-lg);padding:10px;min-width:180px;z-index:50;}
+.notif-badge{position:absolute;top:2px;right:2px;background:#DC4C4C;color:#fff;font-size:9px;font-weight:800;min-width:15px;height:15px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 3px;line-height:1;}
+.notif-popover{position:absolute;top:38px;right:0;background:var(--surface);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow-lg);width:300px;max-height:400px;overflow-y:auto;z-index:50;}
+.notif-popover-head{font-size:12.5px;font-weight:800;padding:10px 12px;border-bottom:1px solid var(--border);}
+.notif-list{display:flex;flex-direction:column;}
+.notif-row{padding:9px 12px;border-bottom:1px solid var(--border);}
+.notif-row:last-child{border-bottom:none;}
+.notif-row.notif-unread{background:var(--accent-dim);}
+.notif-msg{font-size:12px;color:var(--text);line-height:1.35;}
+.notif-time{font-size:10px;color:var(--text-3);margin-top:2px;}
 .initials-popover input{width:100%;box-sizing:border-box;padding:7px 9px;border:1px solid var(--border-strong);border-radius:7px;font-size:13px;}
 .emp-filter-actions{display:flex;gap:6px;margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--border);}
 .emp-filter-actions button{flex:1;border:1px solid var(--border-strong);background:var(--surface-2);border-radius:6px;padding:5px;font-size:11px;font-weight:700;color:var(--text-2);}
@@ -95,11 +104,11 @@ input,select,textarea{font-family:inherit;font-size:14px;}
 .emp-filter-item input{width:auto;}
 .emp-filter-item .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
 
-.dayview-scroll{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow);overflow-x:auto;overflow-y:auto;max-height:80vh;}
+.dayview-scroll{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow);overflow-x:auto;overflow-y:auto;height:calc(100vh - 210px);min-height:420px;}
 .dayview-grid{display:flex;min-width:600px;}
 .time-col{width:56px;flex-shrink:0;border-right:1px solid var(--border);position:sticky;left:0;z-index:20;background:var(--surface);}
 .time-col .col-head{height:52px;border-bottom:1px solid var(--border);position:sticky;top:0;left:0;z-index:26;background:var(--surface-2);}
-.time-slot-label-abs{position:absolute;right:0;width:56px;text-align:right;padding-right:8px;font-size:10.5px;color:var(--text-3);font-weight:600;transform:translateY(-50%);background:var(--surface);box-sizing:border-box;}
+.time-slot-label-abs{position:absolute;right:0;width:56px;text-align:right;padding-right:8px;font-size:var(--font-hour-label,10.5px);color:var(--text-3);font-weight:600;transform:translateY(-50%);background:var(--surface);box-sizing:border-box;}
 .time-slot-label-abs.time-slot-end{color:var(--text-2);}
 .emp-col{flex:1;min-width:210px;border-right:1px solid var(--border);position:relative;}
 .emp-col:last-child{border-right:none;}
@@ -120,11 +129,11 @@ input,select,textarea{font-family:inherit;font-size:14px;}
 .item-block.has-hover-popup{overflow:visible;}
 .item-block:hover{box-shadow:0 8px 20px rgba(20,24,38,.25);z-index:4;}
 .item-block.dragging{opacity:.85;z-index:20;box-shadow:var(--shadow-lg);cursor:grabbing;}
-.item-block .it-title{font-size:10.5px;font-weight:800;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;align-items:flex-start;gap:3px;}
-.it-titletime{font-weight:600;opacity:.85;font-size:9.5px;}
+.item-block .it-title{font-size:var(--font-task-name,10.5px);font-weight:800;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;align-items:flex-start;gap:3px;}
+.it-titletime{font-weight:600;opacity:.85;font-size:var(--font-time-range,9.5px);}
 .it-flags{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px;}
 .it-sub{font-size:10.5px;opacity:.95;font-weight:700;margin-top:1px;}
-.it-dates{font-size:9px;opacity:.9;margin-top:1px;font-weight:700;}
+.it-dates{font-size:var(--font-pv-rok,9px);opacity:.9;margin-top:1px;font-weight:700;}
 .flag{display:inline-flex;align-items:center;gap:3px;font-size:9.5px;font-weight:800;padding:2px 6px;border-radius:20px;background:rgba(255,255,255,.45);color:inherit;text-decoration:none;line-height:1.4;}
 .flag-link{background:rgba(255,255,255,.62);text-decoration:none;border:1px solid rgba(255,255,255,.7);}
 .flag-link:hover{background:rgba(255,255,255,.9);}
@@ -174,7 +183,7 @@ input,select,textarea{font-family:inherit;font-size:14px;}
 .ctx-menu button{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:none;border:none;color:#fff;font-family:inherit;font-size:12.5px;font-weight:600;padding:8px 10px;border-radius:6px;cursor:pointer;}
 .ctx-menu button:hover:not(:disabled){background:rgba(255,255,255,.12);}
 .ctx-menu button:disabled{color:rgba(255,255,255,.35);cursor:default;}
-.mgrid-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow);overflow-x:auto;overflow-y:auto;max-height:80vh;padding:2px;}
+.mgrid-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow);overflow-x:auto;overflow-y:auto;height:calc(100vh - 210px);min-height:420px;padding:2px;}
 
 /* ---- OVERVIEW VIEW ---- */
 :root{ --ov-low:#8FDDAE; --ov-mid:#FFCF5C; --ov-high:#FF9F5A; --ov-over:#F4574A; --ov-vacation:#B9A3E3; }
@@ -253,16 +262,16 @@ input,select,textarea{font-family:inherit;font-size:14px;}
 .mcell-badge-strip .fill-badge{font-size:9px;padding:1px 5px;}
 .mboard{position:relative;cursor:copy;}
 .mb-lunch{position:absolute;left:0;right:0;pointer-events:none;background:repeating-linear-gradient(45deg, rgba(154,161,174,.14), rgba(154,161,174,.14) 4px, transparent 4px, transparent 8px);}
-.mb-axis-label{position:absolute;left:2px;top:1px;font-size:7.5px;color:var(--text-3);font-weight:700;pointer-events:none;z-index:2;line-height:1.3;text-shadow:0 0 3px var(--surface-2),0 0 3px var(--surface-2),0 0 3px var(--surface-2);}
+.mb-axis-label{position:absolute;left:2px;top:1px;font-size:var(--font-hour-label,7.5px);color:var(--text-3);font-weight:700;pointer-events:none;z-index:2;line-height:1.3;text-shadow:0 0 3px var(--surface-2),0 0 3px var(--surface-2),0 0 3px var(--surface-2);}
 .mb-axis-label.hourmark{font-size:8.5px;font-weight:800;color:var(--text-2);}
 .mb-block{position:absolute;left:2px;right:2px;border-radius:5px;border:1px solid rgba(0,0,0,.08);overflow:hidden;font-size:11.5px;font-weight:700;cursor:grab;z-index:3;}
 .mb-block.has-hover-popup{overflow:visible;}
 .mb-block:hover{z-index:5;box-shadow:0 2px 8px rgba(20,24,38,.25);}
 .mb-inner{padding:3px 6px;display:flex;flex-direction:column;gap:2px;overflow:hidden;height:100%;}
-.mbt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.25;font-size:9.5px;font-weight:800;}
-.mb-time-inline{font-weight:600;opacity:.85;font-size:8.5px;}
+.mbt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.25;font-size:var(--font-task-name,9.5px);font-weight:800;}
+.mb-time-inline{font-weight:600;opacity:.85;font-size:var(--font-time-range,8.5px);}
 .mbtime{font-size:8.5px;font-weight:700;opacity:.9;line-height:1.2;}
-.mbdates{font-size:8px;font-weight:700;opacity:.85;line-height:1.2;}
+.mbdates{font-size:var(--font-pv-rok,8px);font-weight:700;opacity:.85;line-height:1.2;}
 .mb-flags{display:flex;gap:5px;margin-top:auto;}
 .mb-resize{position:absolute;left:0;right:0;bottom:0;height:8px;cursor:ns-resize;display:flex;align-items:flex-end;justify-content:center;padding-bottom:1px;z-index:5;}
 .mb-resize::after{content:"";width:16px;height:2.5px;border-radius:2px;background:rgba(0,0,0,.22);opacity:0;transition:opacity .15s,background .15s;}
@@ -461,6 +470,8 @@ const SB_KEY = "sb_publishable_7kdyVE9p6Pfr-3_IbnEPvw_OfQcNmq3";
 const SB_SCHEMA = "raspored";
 const AUTH_KEY = "raspored_authed_v1";
 const INITIALS_KEY = "raspored_initials_v1";
+const PIN_SELF_KEY = "raspored_pin_self_v1";
+const DESKTOP_NOTIF_KEY = "raspored_desktop_notif_v1";
 // Safari (posebno privatni mod, ili stroge postavke "Prevent Cross-Site Tracking") zna baciti grešku
 // pri pisanju u localStorage, ili ga tiho ograničiti. Svaki pristup je zato zaštićen try/catchem, a
 // kolačić se tretira kao ravnopravan (ne samo rezervni) izvor - Safari puno pouzdanije čuva prvostrane
@@ -558,6 +569,7 @@ const ICONS = {
   user: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
   sun: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>',
   moon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>',
+  bell: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>',
 };
 function icon(name, size){
   size = size || 14;
@@ -822,37 +834,119 @@ function computeLunchTrim(itemType, startTime, durationMinutes){
   // cijeli raspon je unutar pauze - minimalni prikaz odmah nakon pauze
   return { splitInTwo:false, shifted:{ start_time:minutesToTime(LUNCH_END_MIN), duration_minutes:SLOT_MIN } };
 }
-// Primjenjuje promjenu na postojeću stavku (drag/resize), poštujući pauzu za ručak. Vraća true ako je
-// primijenjeno (uključujući render), false ako poziva nije trebalo (nema promjene). extraPayload su
-// polja koja se mijenjaju (npr. start_time, duration_minutes, employee_id, item_date).
-async function applyChangeWithLunchSplit(item, extraPayload){
+// MOVE (pomicanje cijelog bloka): ako novo mjesto pocinje UNUTAR neke druge obaveze (task ili pauza),
+// pomakni pocetak na kraj te obaveze (moze se ponoviti kroz vise obaveza zaredom). Nakon toga, skrati kraj
+// ako udari u SLJEDECU obavezu, i ogranici na dnevni limit od 7h. "capped" govori pozivatelju treba li
+// prikazati poruku o kvoti (za razliku od obicnog pomicanja zbog zauzeca).
+function trimAgainstOthersAndDailyCap(itemType, startTime, durationMinutes, employeeId, dateISO, excludeId){
+  const isTaskLike = (itemType==="task" || itemType==="internal_dev");
+  if(!isTaskLike) return { start_time:startTime, duration_minutes:durationMinutes, changed:false, capped:false };
+  const others = occupiedIntervals(employeeId, dateISO, excludeId, true); // ukljucuje i pauzu za rucak
+  let startMin = timeToMinutes(startTime);
+  let shifted = false;
+  let guard = 0;
+  while(guard++<20){
+    const containing = others.find(iv=>startMin>=iv.start && startMin<iv.end);
+    if(!containing) break;
+    startMin = containing.end;
+    shifted = true;
+  }
+  let endMin = startMin + durationMinutes;
+  others.forEach(iv=>{ if(iv.start>=startMin && iv.start<endMin) endMin = Math.min(endMin, iv.start); });
+  endMin = Math.min(endMin, GRID_END_MIN);
+  const usedElsewhere = employeeDayMinutes(employeeId, dateISO, excludeId);
+  const remainingCap = Math.max(0, DAILY_CAP_MIN - usedElsewhere);
+  const maxEndByCapacity = startMin + remainingCap;
+  let capped = false;
+  if(endMin > maxEndByCapacity){ endMin = maxEndByCapacity; capped = true; }
+  const finalDuration = Math.max(SLOT_MIN, endMin - startMin);
+  const changed = shifted || capped || finalDuration!==durationMinutes || minutesToTime(startMin)!==startTime;
+  return { start_time:minutesToTime(startMin), duration_minutes:finalDuration, changed, capped };
+}
+// RESIZE (produljivanje): ne pomice pocetak niti produzuje dalje od mjesta do kojeg je fizicki povuceno -
+// samo "izreze" dijelove koji upadaju u postojece obaveze (task ili pauza) unutar tog dovucenog raspona,
+// isto nacelo kao sto vec radi pauza za rucak, samo prosireno na SVE obaveze, ne samo pauzu.
+function computeResizeSplit(itemType, startTime, durationMinutes, employeeId, dateISO, excludeId){
+  const isTaskLike = (itemType==="task" || itemType==="internal_dev");
+  if(!isTaskLike) return null;
+  const startMin = timeToMinutes(startTime);
+  const endMin = startMin + durationMinutes; // fiksno - ovo je tocno mjesto do kojeg je povuceno
+  const occupied = occupiedIntervals(employeeId, dateISO, excludeId, true);
+  const relevant = occupied.filter(iv=>iv.end>startMin && iv.start<endMin).sort((a,b)=>a.start-b.start);
+  if(!relevant.length) return null; // nema preklapanja - sprema se normalno, bez izmjene
+  const segments = [];
+  let cursor = startMin;
+  for(const iv of relevant){
+    if(iv.start > cursor) segments.push({ start_time:minutesToTime(cursor), duration_minutes: iv.start-cursor });
+    cursor = Math.max(cursor, iv.end);
+  }
+  if(cursor < endMin) segments.push({ start_time:minutesToTime(cursor), duration_minutes: endMin-cursor });
+  const valid = segments.filter(s=>s.duration_minutes>0);
+  if(!valid.length) return null;
+  if(valid.length===1 && valid[0].start_time===startTime && valid[0].duration_minutes===durationMinutes) return null;
+  return valid;
+}
+// Nakon racunanja segmenata (resize split), jos ih ogranici na preostali dnevni kapacitet od 7h -
+// odbacuje/skraćuje segmente od kraja prema pocetku dok ukupno ne stane.
+function capSegmentsToDaily(segments, employeeId, dateISO, excludeId){
+  const usedElsewhere = employeeDayMinutes(employeeId, dateISO, excludeId);
+  let remaining = Math.max(0, DAILY_CAP_MIN - usedElsewhere);
+  const result = [];
+  for(const seg of segments){
+    if(remaining<=0) break;
+    const dur = Math.min(seg.duration_minutes, remaining);
+    if(dur>0){ result.push({ start_time:seg.start_time, duration_minutes:dur }); remaining -= dur; }
+  }
+  return result.length ? result : [ { start_time:segments[0].start_time, duration_minutes:SLOT_MIN } ];
+}
+// Primjenjuje promjenu na postojeću stavku (drag/resize). mode="resize" prelama oko prepreka (fiksan
+// kraj, kao pauza za rucak, prosireno na sve obaveze). mode="move" (zadano) pomice pocetak iza prepreke
+// i upozorava ako se prelazi dnevni limit od 7h.
+async function applyChangeWithLunchSplit(item, extraPayload, mode){
   const newStart = extraPayload.start_time || item.start_time;
   const newDuration = extraPayload.duration_minutes || item.duration_minutes;
-  const split = computeLunchTrim(item.item_type, newStart, newDuration);
-  if(!split){
-    const row = await Items.update(item.id, extraPayload);
-    const idx = state.items.findIndex(x=>x.id===item.id);
-    if(idx>-1) state.items[idx] = row;
+  const empId = extraPayload.employee_id || item.employee_id;
+  const dateISO = extraPayload.item_date || item.item_date;
+
+  if(mode==="resize"){
+    const segments = computeResizeSplit(item.item_type, newStart, newDuration, empId, dateISO, item.id);
+    if(!segments){
+      const row = await Items.update(item.id, extraPayload);
+      const idx = state.items.findIndex(x=>x.id===item.id);
+      if(idx>-1) state.items[idx] = row;
+      return;
+    }
+    const capped = capSegmentsToDaily(segments, empId, dateISO, item.id);
+    if(capped.length===1){
+      const payload = Object.assign({}, extraPayload, capped[0]);
+      const row = await Items.update(item.id, payload);
+      const idx = state.items.findIndex(x=>x.id===item.id);
+      if(idx>-1) state.items[idx] = row;
+      showToast("Prilagođeno postojećoj obavezi u tom razdoblju.");
+      return;
+    }
+    await withUndoBatch("razdvajanje kod produljivanja", async ()=>{
+      const payload1 = Object.assign({}, extraPayload, capped[0]);
+      const row1 = await Items.update(item.id, payload1);
+      const idx = state.items.findIndex(x=>x.id===item.id);
+      if(idx>-1) state.items[idx] = row1;
+      for(let i=1;i<capped.length;i++){
+        const row = await Items.create(Object.assign({}, itemDataFields(item), extraPayload, capped[i]));
+        state.items.push(row);
+      }
+    });
+    showToast("Task ide preko postojeće obaveze — razdvojen u "+capped.length+" dijela, do mjesta do kojeg je povučeno.");
     return;
   }
-  if(!split.splitInTwo){
-    const payload = Object.assign({}, extraPayload, split.shifted);
-    const row = await Items.update(item.id, payload);
-    const idx = state.items.findIndex(x=>x.id===item.id);
-    if(idx>-1) state.items[idx] = row;
-    showToast("Prilagođeno pauzi za ručak (12:00–13:00).");
-    return;
-  }
-  await withUndoBatch("razdvajanje preko pauze", async ()=>{
-    const payload1 = Object.assign({}, extraPayload, split.seg1);
-    const row1 = await Items.update(item.id, payload1);
-    const idx = state.items.findIndex(x=>x.id===item.id);
-    if(idx>-1) state.items[idx] = row1;
-    const payload2 = Object.assign({}, itemDataFields(item), extraPayload, split.seg2);
-    const row2 = await Items.create(payload2);
-    state.items.push(row2);
-  });
-  showToast("Task ide preko pauze — razdvojen u dvije stavke, kraj ostaje ondje gdje je odvučeno.");
+
+  // MOVE (zadano)
+  const extra = trimAgainstOthersAndDailyCap(item.item_type, newStart, newDuration, empId, dateISO, item.id);
+  const payload = Object.assign({}, extraPayload, {start_time:extra.start_time, duration_minutes:extra.duration_minutes});
+  const row = await Items.update(item.id, payload);
+  const idx = state.items.findIndex(x=>x.id===item.id);
+  if(idx>-1) state.items[idx] = row;
+  if(extra.capped) showToast("Task prelazi dnevnu kvotu od 7h za taj dan — skraćen na "+minutesToHM(extra.duration_minutes)+".");
+  else if(extra.changed) showToast("Pomaknuto na "+extra.start_time+" — tamo je bilo zauzeto.");
 }
 
 /* =========================================================
@@ -868,21 +962,12 @@ function copyItemToClipboard(item){
 async function pasteClipboardAt(employeeId, dateISO, startTime){
   if(!state.taskClipboard) return;
   const base = Object.assign({}, state.taskClipboard, { employee_id: employeeId, item_date: dateISO, start_time: startTime });
-  const split = computeLunchTrim(base.item_type, base.start_time, base.duration_minutes);
   try{
-    if(!split){
-      const row = await Items.create(base); state.items.push(row);
-    } else if(!split.splitInTwo){
-      const row = await Items.create(Object.assign({}, base, split.shifted)); state.items.push(row);
-    } else {
-      await withUndoBatch("lijepljenje preko pauze", async ()=>{
-        const row1 = await Items.create(Object.assign({}, base, split.seg1)); state.items.push(row1);
-        const row2 = await Items.create(Object.assign({}, base, split.seg2)); state.items.push(row2);
-      });
-    }
+    const extra = trimAgainstOthersAndDailyCap(base.item_type, base.start_time, base.duration_minutes, employeeId, dateISO, null);
+    const row = await Items.create(Object.assign({}, base, {start_time:extra.start_time, duration_minutes:extra.duration_minutes})); state.items.push(row);
     state.contextMenu = null;
     refreshScheduleArea();
-    showToast("Zalijepljeno.");
+    showToast(extra.capped ? "Zalijepljeno — skraćeno na "+minutesToHM(extra.duration_minutes)+" zbog dnevnog limita (7h)." : (extra.changed ? "Zalijepljeno na "+extra.start_time+" (tamo je bilo zauzeto)." : "Zalijepljeno."));
   }catch(err){ showToast("Greška kod lijepljenja: "+err.message); }
 }
 // Racuna zaposlenika/datum/vrijeme ispod dane tocke na ekranu, za dan i tjedan/3-dana prikaz.
@@ -975,10 +1060,12 @@ const state = {
   redoStack: [],
   taskClipboard: null,
   contextMenu: null,
-  settings: { row_px_day:46, row_px_3day:34, row_px_week:30, sound_enabled:true, soundMappings:{} },
+  settings: { row_px_day:46, row_px_3day:34, row_px_week:30, sound_enabled:true, soundMappings:{},
+    font_pv_rok:9, font_task_name:10.5, font_time_range:9.5, font_hour_label:10.5 },
   settingsModalOpen: false, settingsUnlocked: false, settingsError: null, settingsBusy: false,
   soundFormOpen: false, newSoundInitials: "", newSoundFile: null, soundFormBusy: false,
   theme: "light",
+  notifications: [], notificationsUnread: 0, notificationBellOpen: false, notificationHistoryOpen: false,
 };
 
 function getVisibleDates(){
@@ -1026,17 +1113,25 @@ async function migratePastelColors(){
 }
 async function loadSettings(){
   try{
-    const rows = await sb("/app_config?select=key,value&key=in.(row_px_day,row_px_3day,row_px_week,sound_enabled)");
+    const rows = await sb("/app_config?select=key,value&key=in.(row_px_day,row_px_3day,row_px_week,sound_enabled,font_pv_rok,font_task_name,font_time_range,font_hour_label)");
     (rows||[]).forEach(r=>{
       if(r.key==="sound_enabled"){ state.settings.sound_enabled = r.value==="true"; return; }
-      const n=parseInt(r.value); if(!isNaN(n)) state.settings[r.key]=n;
+      const n=parseFloat(r.value); if(!isNaN(n)) state.settings[r.key]=n;
     });
     const soundRows = await sb("/sound_mappings?select=initials,audio_data_url,file_name");
     const map = {};
     (soundRows||[]).forEach(r=>{ map[r.initials.toUpperCase()] = { audioDataUrl:r.audio_data_url, fileName:r.file_name }; });
     state.settings.soundMappings = map;
+    applyFontSizeVars();
     state._settingsLoaded = true;
   }catch(e){ state._settingsLoaded = false; }
+}
+function applyFontSizeVars(){
+  const r = document.documentElement.style;
+  r.setProperty("--font-pv-rok", state.settings.font_pv_rok+"px");
+  r.setProperty("--font-task-name", state.settings.font_task_name+"px");
+  r.setProperty("--font-time-range", state.settings.font_time_range+"px");
+  r.setProperty("--font-hour-label", state.settings.font_hour_label+"px");
 }
 async function loadVisibleItems(force){
   const dates = getVisibleDates();
@@ -1064,6 +1159,13 @@ let liveRefreshTimer = null;
 function isUserBusy(){
   return !!(state.itemModal || state.employeeModalOpen || state.reportModal || state.monthOverview || state.duplicatePanel || state.initialsPickerOpen || drag);
 }
+function maybeSendDesktopNotification(title, body){
+  if(!state.desktopNotifsEnabled) return;
+  if(!(window.__TAURI__ && window.__TAURI__.core)) return; // samo desktop app, web se tiho preskace
+  window.__TAURI__.core.invoke("send_desktop_notification", { title, body }).catch(err=>{
+    console.error("Desktop obavijest nije uspjela:", err);
+  });
+}
 async function liveRefreshTick(){
   if(!state.authed || isUserBusy()) return;
   try{
@@ -1071,10 +1173,60 @@ async function liveRefreshTick(){
     const fresh = await Items.listRange(state.itemsRangeStart||dates[0], state.itemsRangeEnd||dates[dates.length-1]);
     const freshStr = JSON.stringify(fresh);
     if(freshStr === state._itemsSnapshot) return; // nothing actually changed — skip re-render entirely, no flicker
+    const oldIds = new Set(state.items.map(it=>it.id));
+    const newItems = (fresh||[]).filter(it=>!oldIds.has(it.id));
     state.items = fresh || [];
     state._itemsSnapshot = freshStr;
     refreshScheduleArea(); // scroll position is preserved automatically inside this
+    newItems.forEach(it=>checkAndNotifyForItem(it));
   }catch(e){ /* silent - next tick retries */ }
+}
+// Obavijesti: provjerava li se NOVI unos odnosi bas na OSOBU koja sjedi za ovim uredjajem (po inicijalima
+// zaposlenika kojem je task dodijeljen). Buduci da vlastiti unosi vec postoje u state.items PRIJE ovog tick-a
+// (jer smo ih sami push-ali odmah nakon spremanja), ovaj provjera se prirodno NIKAD ne okine za vlastiti unos -
+// samo kad NETKO DRUGI doda nesto sto se tice mene.
+async function checkAndNotifyForItem(item){
+  if(!state.myInitials) return;
+  const emp = state.employees.find(e=>e.id===item.employee_id);
+  if(!emp || !emp.initials) return;
+  if(emp.initials.toUpperCase() !== state.myInitials.toUpperCase()) return;
+  const label = item.item_type==="vacation" ? "Godišnji odmor" : (item.task_number || (TYPE_META[item.item_type]?TYPE_META[item.item_type].label:"Stavka"));
+  const msg = label+" — "+fmtDateHR(item.item_date)+", "+item.start_time;
+  await addNotification(msg, item.id);
+  maybePlayCreationSound();
+  maybeSendDesktopNotification("Novo u rasporedu", msg);
+}
+async function addNotification(message, itemId){
+  try{
+    const row = await sb("/notifications", {method:"POST", headers:{Prefer:"return=representation"}, body:JSON.stringify({
+      target_initials: state.myInitials.toUpperCase(), message, item_id: itemId||null,
+    })});
+    const created = Array.isArray(row)?row[0]:row;
+    if(created){ state.notifications.unshift(created); state.notificationsUnread++; }
+    refreshTopbar();
+  }catch(e){ console.error("Greška kod spremanja obavijesti:", e); }
+}
+async function loadNotifications(){
+  if(!state.myInitials) return;
+  try{
+    await sb("/notifications?target_initials=eq."+encodeURIComponent(state.myInitials.toUpperCase())+"&created_at=lt."+encodeURIComponent(new Date(Date.now()-14*24*60*60*1000).toISOString()), {method:"DELETE"});
+    const rows = await sb("/notifications?target_initials=eq."+encodeURIComponent(state.myInitials.toUpperCase())+"&order=created_at.desc&limit=100");
+    state.notifications = rows||[];
+    state.notificationsUnread = state.notifications.filter(n=>!n.read).length;
+  }catch(e){ console.error("Greška kod dohvata obavijesti:", e); }
+}
+async function markNotificationsRead(){
+  const unread = state.notifications.filter(n=>!n.read);
+  if(!unread.length) return;
+  state.notifications.forEach(n=>n.read=true);
+  state.notificationsUnread = 0;
+  try{ await sb("/notifications?target_initials=eq."+encodeURIComponent(state.myInitials.toUpperCase())+"&read=eq.false", {method:"PATCH", body:JSON.stringify({read:true})}); }
+  catch(e){ /* tiho - stanje je vec azurirano lokalno */ }
+}
+function refreshTopbar(){
+  const el = document.getElementById("topbarWrap");
+  if(!el){ render(); return; }
+  el.outerHTML = renderTopbar();
 }
 function startLiveRefresh(){
   if(liveRefreshTimer) return;
@@ -1104,8 +1256,11 @@ async function boot(){
   // URL parametar (?u=XX) je imun na čišćenje localStorage/kolačića (npr. korporativni proxy, Chrome politike)
   // pa ima prednost ako postoji - i odmah se sinkronizira natrag u storage za slučaj da storage ipak radi.
   state.myInitials = urlInitials || savedInitials || null;
+  state.pinSelfToTop = safeLsGet(PIN_SELF_KEY) === "1";
+  state.desktopNotifsEnabled = safeLsGet(DESKTOP_NOTIF_KEY) === "1";
   if(state.myInitials){ setPersistentAuth(state.myInitials); updateUrlInitials(state.myInitials); }
   await bootDataWithRetry();
+  await loadNotifications();
   state.loading = false;
   render();
 }
@@ -1130,12 +1285,21 @@ function updateUrlInitials(val){
     history.replaceState(null, "", url.toString());
   }catch(e){}
 }
-function saveMyInitials(){
+async function saveMyInitials(){
   const el = document.getElementById("myInitialsInput");
   const val = (el.value||"").trim().toUpperCase().slice(0,4);
+  const pin = document.getElementById("pinSelfToggle").checked;
+  state.pinSelfToTop = pin;
+  safeLsSet(PIN_SELF_KEY, pin ? "1" : "0");
+  const notifToggleEl = document.getElementById("desktopNotifToggle");
+  if(notifToggleEl){
+    state.desktopNotifsEnabled = notifToggleEl.checked;
+    safeLsSet(DESKTOP_NOTIF_KEY, notifToggleEl.checked ? "1" : "0");
+  }
   if(val){
     setPersistentAuth(val); state.myInitials = val; updateUrlInitials(val);
     if(!presenceTimer){ heartbeat(); startPresencePolling(); }
+    await loadNotifications();
     showToast("Inicijali spremljeni. Spremi ovaj link kao bookmark za najpouzdanije pamćenje.");
   }
   state.initialsPickerOpen = false;
@@ -1184,6 +1348,37 @@ function colorForInitials(initials){
 function renderPresenceOnly(){
   const el = document.getElementById("presenceRow");
   if(el) el.outerHTML = renderPresenceRow();
+}
+function renderNotificationBell(){
+  const list = state.notifications||[];
+  const shown = state.notificationHistoryOpen ? list : list.slice(0,5);
+  return `<div style="position:relative;">
+    <button class="btn btn-ghost" data-act="toggle-notification-bell" title="Obavijesti" style="position:relative;">
+      ${icon('bell',16)}
+      ${state.notificationsUnread>0 ? `<span class="notif-badge">${state.notificationsUnread>9?"9+":state.notificationsUnread}</span>` : ""}
+    </button>
+    ${state.notificationBellOpen ? `<div class="notif-popover" data-stop="1">
+      <div class="notif-popover-head">Obavijesti</div>
+      ${!list.length ? `<p style="font-size:12px;color:var(--text-3);padding:10px 12px;">Nema obavijesti u zadnjih 14 dana.</p>` : `
+        <div class="notif-list">
+          ${shown.map(n=>`<div class="notif-row ${n.read?'':'notif-unread'}">
+            <div class="notif-msg">${escapeHtml(n.message)}</div>
+            <div class="notif-time">${notifRelativeTime(n.created_at)}</div>
+          </div>`).join("")}
+        </div>
+        ${list.length>5 ? `<button class="btn btn-ghost btn-sm" data-act="toggle-notification-history" style="width:100%;margin-top:4px;">${state.notificationHistoryOpen?"Prikaži manje":"Prikaži sve ("+list.length+")"}</button>` : ""}
+      `}
+    </div>` : ""}
+  </div>`;
+}
+function notifRelativeTime(iso){
+  const diffMin = Math.round((Date.now()-new Date(iso).getTime())/60000);
+  if(diffMin<1) return "upravo sad";
+  if(diffMin<60) return diffMin+" min";
+  const diffH = Math.round(diffMin/60);
+  if(diffH<24) return diffH+" h";
+  const diffD = Math.round(diffH/24);
+  return diffD+" d";
 }
 function renderPresenceRow(){
   const list = state.activeSessions||[];
@@ -1239,6 +1434,12 @@ function render(){
   restoreScroll(snap);
 }
 function escapeHtml(s){ return (s==null?"":String(s)).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function sortPinnedFirst(emps){
+  if(!state.pinSelfToTop || !state.myInitials) return emps;
+  const mine = emps.find(e=>(e.initials||"").toUpperCase()===state.myInitials.toUpperCase());
+  if(!mine) return emps;
+  return [mine, ...emps.filter(e=>e.id!==mine.id)];
+}
 
 /* =========================================================
    TOPBAR + CONTROLS + FILTER
@@ -1252,7 +1453,7 @@ function renderContextMenu(){
   return `<div class="ctx-menu" style="left:${cm.x}px;top:${cm.y}px;" data-stop="1">${items}</div>`;
 }
 function renderTopbar(){
-  return `<div class="topbar">
+  return `<div class="topbar" id="topbarWrap">
     <div class="brand">
       <div class="mark">DT</div>
       <div><h1>Raspored — Dizajn tim</h1><div class="sub">${state.employees.filter(e=>e.active).length} aktivnih zaposlenika</div></div>
@@ -1262,12 +1463,19 @@ function renderTopbar(){
       <button class="btn" data-act="open-employees">${icon('users')} Zaposlenici</button>
       <button class="btn btn-ghost" data-act="toggle-theme" title="${state.theme==='dark'?'Prebaci na svijetlu temu':'Prebaci na tamnu temu'}">${icon(state.theme==='dark'?'sun':'moon',16)}</button>
       <button class="btn btn-ghost" data-act="open-settings" title="Postavke">${icon('settings',16)}</button>
+      ${state.myInitials ? renderNotificationBell() : ""}
       <div style="position:relative;">
         <button class="btn btn-ghost" data-act="toggle-initials-picker" title="Tvoji inicijali (opcionalno - za zvučnu obavijest i prisutnost)">${state.myInitials ? escapeHtml(state.myInitials) : icon('user',15)}</button>
         ${state.initialsPickerOpen ? `<div class="initials-popover" data-stop="1">
           <label style="font-size:11px;color:var(--text-2);font-weight:700;">Tvoji inicijali (opcionalno)</label>
           <input type="text" id="myInitialsInput" value="${escapeHtml(state.myInitials||'')}" maxlength="4" style="text-transform:uppercase;margin-top:6px;" placeholder="npr. AJ">
           <p style="font-size:10px;color:var(--text-3);margin:6px 0 0;line-height:1.4;">Nakon spremanja, link u adresnoj traci će sadržavati tvoje inicijale — spremi ga kao bookmark za najpouzdanije pamćenje.</p>
+          <label style="display:flex;align-items:center;gap:7px;margin-top:10px;font-size:12px;cursor:pointer;">
+            <input type="checkbox" id="pinSelfToggle" ${state.pinSelfToTop?"checked":""}> Zakvači me na vrh popisa
+          </label>
+          ${window.__TAURI__ ? `<label style="display:flex;align-items:center;gap:7px;margin-top:8px;font-size:12px;cursor:pointer;">
+            <input type="checkbox" id="desktopNotifToggle" ${state.desktopNotifsEnabled?"checked":""}> Obavijesti na ovom računalu
+          </label>` : ""}
           <div style="display:flex;gap:6px;margin-top:8px;">
             <button class="btn btn-ghost btn-sm" data-act="clear-initials" style="flex:1;">Ukloni</button>
             <button class="btn btn-primary btn-sm" data-act="save-initials" style="flex:1;">Spremi</button>
@@ -1332,7 +1540,7 @@ function renderControlsRow(){
 function renderDayView(){
   const dateISO = state.currentDate;
   const weekend = isWeekend(dateISO);
-  const activeEmps = state.employees.filter(e=>e.active && !state.hiddenEmployeeIds.has(e.id));
+  const activeEmps = sortPinnedFirst(state.employees.filter(e=>e.active && !state.hiddenEmployeeIds.has(e.id)));
   const dayItems = state.items.filter(it=>it.item_date===dateISO);
 
   if(activeEmps.length===0){
@@ -1459,8 +1667,8 @@ function effectiveWorkMinutes(startTime, durationMin){
   const overlap = Math.max(0, Math.min(end, LUNCH_END_MIN) - Math.max(start, LUNCH_START_MIN));
   return durationMin - overlap;
 }
-function employeeDayMinutes(empId, dateISO){
-  return state.items.filter(it=>it.employee_id===empId && it.item_date===dateISO && it.item_type!=="vacation")
+function employeeDayMinutes(empId, dateISO, excludeId){
+  return state.items.filter(it=>it.employee_id===empId && it.item_date===dateISO && it.item_type!=="vacation" && it.id!==excludeId)
     .reduce((s,it)=>s+effectiveWorkMinutes(it.start_time, it.duration_minutes),0);
 }
 function employeeDayVacationMinutes(empId, dateISO){
@@ -1500,7 +1708,7 @@ function overloadBadgeHtml(empId, dateISO, size){
    ========================================================= */
 function renderMultiDayView(){
   const dates = getVisibleDates();
-  const activeEmps = state.employees.filter(e=>e.active && !state.hiddenEmployeeIds.has(e.id));
+  const activeEmps = sortPinnedFirst(state.employees.filter(e=>e.active && !state.hiddenEmployeeIds.has(e.id)));
   if(activeEmps.length===0){
     return `<div class="empty-state"><h3>Nema vidljivih zaposlenika</h3><p>Dodaj zaposlenike ili isključi filter iznad.</p></div>`;
   }
@@ -1553,7 +1761,7 @@ function computeOverviewGrid(dates){
   return { templateColumns: cols.join(" "), dateCol };
 }
 function renderOverviewView(){
-  const activeEmps = state.employees.filter(e=>e.active);
+  const activeEmps = sortPinnedFirst(state.employees.filter(e=>e.active));
   if(state.overviewSelectedEmpIds===null) state.overviewSelectedEmpIds = new Set(activeEmps.map(e=>e.id));
   const dates = getVisibleDates(); // 14 uzastopnih ISO datuma (2 tjedna)
   const grid = computeOverviewGrid(dates);
@@ -1839,14 +2047,25 @@ async function saveSettings(){
   const day3 = parseInt(document.getElementById("setRow3day").value)||34;
   const week = parseInt(document.getElementById("setRowWeek").value)||30;
   const soundEnabled = document.getElementById("setSoundEnabled").checked;
+  const fontPvRok = parseFloat(document.getElementById("setFontPvRok").value)||9;
+  const fontTaskName = parseFloat(document.getElementById("setFontTaskName").value)||10.5;
+  const fontTimeRange = parseFloat(document.getElementById("setFontTimeRange").value)||9.5;
+  const fontHourLabel = parseFloat(document.getElementById("setFontHourLabel").value)||10.5;
   state.settingsBusy = true; render();
   try{
     await sb("/app_config?on_conflict=key", {method:"POST", headers:{Prefer:"resolution=merge-duplicates"}, body:JSON.stringify({key:"row_px_day", value:String(day)})});
     await sb("/app_config?on_conflict=key", {method:"POST", headers:{Prefer:"resolution=merge-duplicates"}, body:JSON.stringify({key:"row_px_3day", value:String(day3)})});
     await sb("/app_config?on_conflict=key", {method:"POST", headers:{Prefer:"resolution=merge-duplicates"}, body:JSON.stringify({key:"row_px_week", value:String(week)})});
     await sb("/app_config?on_conflict=key", {method:"POST", headers:{Prefer:"resolution=merge-duplicates"}, body:JSON.stringify({key:"sound_enabled", value:String(soundEnabled)})});
+    await sb("/app_config?on_conflict=key", {method:"POST", headers:{Prefer:"resolution=merge-duplicates"}, body:JSON.stringify({key:"font_pv_rok", value:String(fontPvRok)})});
+    await sb("/app_config?on_conflict=key", {method:"POST", headers:{Prefer:"resolution=merge-duplicates"}, body:JSON.stringify({key:"font_task_name", value:String(fontTaskName)})});
+    await sb("/app_config?on_conflict=key", {method:"POST", headers:{Prefer:"resolution=merge-duplicates"}, body:JSON.stringify({key:"font_time_range", value:String(fontTimeRange)})});
+    await sb("/app_config?on_conflict=key", {method:"POST", headers:{Prefer:"resolution=merge-duplicates"}, body:JSON.stringify({key:"font_hour_label", value:String(fontHourLabel)})});
     state.settings.row_px_day = day; state.settings.row_px_3day = day3; state.settings.row_px_week = week;
     state.settings.sound_enabled = soundEnabled;
+    state.settings.font_pv_rok = fontPvRok; state.settings.font_task_name = fontTaskName;
+    state.settings.font_time_range = fontTimeRange; state.settings.font_hour_label = fontHourLabel;
+    applyFontSizeVars();
     state.settingsBusy = false;
     state.settingsModalOpen = false;
     showToast("Postavke spremljene za sve korisnike.");
@@ -1869,6 +2088,16 @@ function renderSettingsModal(){
         <div class="field"><label>Dnevni prikaz</label><input type="number" id="setRowDay" value="${state.settings.row_px_day}" min="20" max="120"></div>
         <div class="field"><label>3-dnevni prikaz</label><input type="number" id="setRow3day" value="${state.settings.row_px_3day}" min="10" max="100"></div>
         <div class="field"><label>Tjedni prikaz</label><input type="number" id="setRowWeek" value="${state.settings.row_px_week}" min="8" max="80"></div>
+        <div class="field" style="border-top:1px solid var(--border);padding-top:12px;margin-top:4px;">
+          <label style="font-weight:700;">Veličina teksta (px)</label>
+          <p style="font-size:11.5px;color:var(--text-2);margin:2px 0 8px;">Trenutne vrijednosti su već upisane ispod — promijeni broj po želji.</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div><label style="font-size:11.5px;">PV / Rok</label><input type="number" id="setFontPvRok" value="${state.settings.font_pv_rok}" min="6" max="20" step="0.5"></div>
+            <div><label style="font-size:11.5px;">Naziv taska (TEVA-xxx)</label><input type="number" id="setFontTaskName" value="${state.settings.font_task_name}" min="6" max="20" step="0.5"></div>
+            <div><label style="font-size:11.5px;">Sati (od-do)</label><input type="number" id="setFontTimeRange" value="${state.settings.font_time_range}" min="6" max="20" step="0.5"></div>
+            <div><label style="font-size:11.5px;">Brojevi sati u stupcu</label><input type="number" id="setFontHourLabel" value="${state.settings.font_hour_label}" min="6" max="20" step="0.5"></div>
+          </div>
+        </div>
         <div class="field" style="border-top:1px solid var(--border);padding-top:12px;margin-top:4px;">
           <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
             <input type="checkbox" id="setSoundEnabled" ${state.settings.sound_enabled?"checked":""}> Zvučna obavijest pri dodavanju taska
@@ -1913,6 +2142,7 @@ function renderEmployeeModal(){
     <div class="emp-row" style="position:relative;">
       <button class="color-dot-btn" style="background:${emp.color}" data-act="pick-color" data-id="${emp.id}"></button>
       <input type="text" value="${escapeHtml(emp.name)}" data-act="rename-emp" data-id="${emp.id}">
+      <input type="text" value="${escapeHtml(emp.initials||"")}" data-act="set-emp-initials" data-id="${emp.id}" maxlength="4" placeholder="Inic." style="width:52px;text-transform:uppercase;flex:none;" title="Inicijali (za obavijesti i zvukove)">
       ${!emp.active ? `<span class="inactive-tag">neaktivan</span>` : ""}
       <button class="btn btn-ghost btn-sm" data-act="toggle-active-emp" data-id="${emp.id}">${emp.active?"Deaktiviraj":"Aktiviraj"}</button>
       <button class="btn btn-ghost btn-sm btn-danger" data-act="delete-emp" data-id="${emp.id}">${icon('trash',12)} Ukloni</button>
@@ -1966,14 +2196,42 @@ function startTimeOptionsHtml(d, intervals){
     return `<option value="${t}" ${t===d.start_time?"selected":""} ${occupied?"disabled":""}>${t}${label}</option>`;
   }).join("");
 }
-function durationOptionsHtml(d, intervals){
-  const nextStart = nextOccupiedStart(intervals, timeToMinutes(d.start_time));
-  const maxDur = Math.min(GRID_END_MIN, nextStart) - timeToMinutes(d.start_time);
-  const all = []; for(let m=SLOT_MIN;m<=540;m+=SLOT_MIN) all.push(m);
-  const opts = all.filter(m=>m<=maxDur);
-  if(!opts.length) opts.push(SLOT_MIN);
-  if(d.duration_minutes>maxDur) d.duration_minutes = opts[opts.length-1];
-  return opts.map(m=>`<option value="${m}" ${m===d.duration_minutes?"selected":""}>${minutesToHM(m)}</option>`).join("");
+const DAILY_CAP_MIN = 420; // 7h standardni radni dan
+function durationOptionsHtml(d, dailyRemainingMin){
+  const startMin = timeToMinutes(d.start_time);
+  const maxDur = Math.max(SLOT_MIN, Math.min(dailyRemainingMin, GRID_END_MIN - startMin));
+  const all = []; for(let m=SLOT_MIN;m<=maxDur;m+=SLOT_MIN) all.push(m);
+  if(!all.length) all.push(SLOT_MIN);
+  if(d.duration_minutes>maxDur) d.duration_minutes = all[all.length-1];
+  return all.map(m=>`<option value="${m}" ${m===d.duration_minutes?"selected":""}>${minutesToHM(m)}</option>`).join("");
+}
+// Opcenita razdioba oko SVIH postojecih zauzeca (pauza za rucak + drugi taskovi) - cuva ukupno trazeno
+// trajanje (produzuje dalje ako naidje na prepreku), umjesto da skracuje ili blokira unos. Vraca null
+// ako nema preklapanja (sprema se kao jedna stavka kao i do sad).
+function computeSplitAroundOccupied(itemType, startTime, durationMinutes, employeeId, dateISO, excludeId){
+  const isTaskLike = (itemType==="task" || itemType==="internal_dev");
+  if(!isTaskLike) return null;
+  const occupied = occupiedIntervals(employeeId, dateISO, excludeId, true);
+  const startMin = timeToMinutes(startTime);
+  let cursor = startMin, remaining = durationMinutes;
+  const segments = [];
+  const relevant = occupied.filter(iv=>iv.end>startMin).sort((a,b)=>a.start-b.start);
+  for(const iv of relevant){
+    if(remaining<=0) break;
+    if(iv.start > cursor){
+      const freeLen = Math.min(iv.start-cursor, remaining);
+      if(freeLen>0){ segments.push({start_time:minutesToTime(cursor), duration_minutes:freeLen}); remaining -= freeLen; }
+    }
+    cursor = Math.max(cursor, iv.end);
+  }
+  if(remaining>0){
+    const cap = Math.max(0, GRID_END_MIN - cursor);
+    const finalLen = Math.min(remaining, cap);
+    if(finalLen>0){ segments.push({start_time:minutesToTime(cursor), duration_minutes:finalLen}); remaining -= finalLen; }
+  }
+  if(segments.length===0) return null; // rubni slucaj - nije bilo moguce nista smjestiti
+  if(segments.length===1 && segments[0].start_time===startTime && segments[0].duration_minutes===durationMinutes) return null; // bez promjene
+  return segments;
 }
 function stripTevaPrefix(v){ return v ? v.replace(/^TEVA-/i,"") : ""; }
 function renderItemModal(){
@@ -1981,7 +2239,8 @@ function renderItemModal(){
   const activeEmps = state.employees.filter(e=>e.active || e.id===d.employee_id);
   const isEdit = st.mode==="edit";
   const startIntervals = occupiedIntervals(d.employee_id, d.item_date, isEdit?st.id:null, true);
-  const durationIntervals = occupiedIntervals(d.employee_id, d.item_date, isEdit?st.id:null, false);
+  const usedMin = employeeDayMinutes(d.employee_id, d.item_date, isEdit?st.id:null);
+  const dailyRemainingMin = d.item_type==="vacation" ? (GRID_END_MIN-GRID_START_MIN) : Math.max(SLOT_MIN, DAILY_CAP_MIN - usedMin);
   const wholeDayChecked = d.item_type==="vacation" && d.start_time==="08:00" && d.duration_minutes>=540;
 
   return `<div class="overlay" data-act="close-overlay">
@@ -2023,7 +2282,8 @@ function renderItemModal(){
           <select id="f_start_time">${startTimeOptionsHtml(d, startIntervals)}</select>
         </div>
         <div class="field"><label>Trajanje</label>
-          <select id="f_duration">${durationOptionsHtml(d, durationIntervals)}</select>
+          <select id="f_duration">${durationOptionsHtml(d, dailyRemainingMin)}</select>
+          ${d.item_type!=="vacation" ? `<p style="font-size:10.5px;color:var(--text-3);margin:4px 0 0;">Preostalo danas: ${minutesToHM(dailyRemainingMin)} od ${minutesToHM(DAILY_CAP_MIN)}. Ako naiđe na postojeći task, automatski se razdvoji prije/poslije njega.</p>` : ""}
         </div>
       </div>
       ${(d.item_type==="task"||d.item_type==="internal_dev") ? `<div class="lunch-hint">Ako trajanje prijeđe 12:00–13:00, automatski se dijeli u dvije stavke — prije i poslije ručka.</div>` : ""}
@@ -2131,6 +2391,7 @@ function bindEvents(){
     window._ctxMenuCloseBound = true;
     document.addEventListener("mousedown", (e)=>{
       if(state.contextMenu && !e.target.closest(".ctx-menu")){ state.contextMenu=null; render(); }
+      if(state.notificationBellOpen && !e.target.closest(".notif-popover") && !e.target.closest('[data-act="toggle-notification-bell"]')){ state.notificationBellOpen=false; render(); }
     }, true);
   }
   document.addEventListener("keydown", (e)=>{
@@ -2181,6 +2442,12 @@ function bindEvents(){
     if(act==="preview-sound"){ previewSound(t.dataset.initials); return; }
     if(act==="toggle-theme"){ toggleTheme(); return; }
     if(act==="toggle-initials-picker"){ state.initialsPickerOpen = !state.initialsPickerOpen; render(); return; }
+    if(act==="toggle-notification-bell"){
+      state.notificationBellOpen = !state.notificationBellOpen;
+      if(state.notificationBellOpen) await markNotificationsRead();
+      render(); return;
+    }
+    if(act==="toggle-notification-history"){ state.notificationHistoryOpen = !state.notificationHistoryOpen; render(); return; }
     if(act==="ov-toggle-emp"){
       const id = t.dataset.id;
       if(t.checked) state.overviewSelectedEmpIds.add(id); else state.overviewSelectedEmpIds.delete(id);
@@ -2199,7 +2466,7 @@ function bindEvents(){
       await loadVisibleItems(true); refreshScheduleArea();
       return;
     }
-    if(act==="save-initials"){ saveMyInitials(); return; }
+    if(act==="save-initials"){ await saveMyInitials(); return; }
     if(act==="clear-initials"){ clearMyInitials(); return; }
     if(act==="add-employee"){ await addEmployee(); return; }
     if(act==="toggle-active-emp"){ await toggleActiveEmp(t.dataset.id); return; }
@@ -2280,6 +2547,10 @@ document.getElementById("app").addEventListener("blur", async (e)=>{
   if(e.target.dataset && e.target.dataset.act==="rename-emp"){
     const id=e.target.dataset.id, name=e.target.value.trim();
     if(name){ try{ await Employees.update(id,{name}); const emp=state.employees.find(x=>x.id===id); if(emp) emp.name=name; }catch(err){ showToast("Greška: "+err.message); } }
+  }
+  if(e.target.dataset && e.target.dataset.act==="set-emp-initials"){
+    const id=e.target.dataset.id, initials=e.target.value.trim().toUpperCase().slice(0,4);
+    try{ await Employees.update(id,{initials: initials||null}); const emp=state.employees.find(x=>x.id===id); if(emp) emp.initials=initials||null; }catch(err){ showToast("Greška: "+err.message); }
   }
 }, true);
 function closeAllModals(){ state.employeeModalOpen=false; state.itemModal=null; state.reportModal=null; state.datePicker=null; state.monthOverview=null; render(); }
@@ -2682,8 +2953,10 @@ async function addEmployee(){
   const name = input.value.trim();
   if(!name) return;
   const color = EMP_COLORS[state.employees.length % EMP_COLORS.length];
+  const parts = name.split(/\s+/).filter(Boolean);
+  const initials = ((parts[0]||"")[0]||"") + ((parts[1]||"")[0]||"");
   try{
-    const created = await Employees.create({name,color,active:true});
+    const created = await Employees.create({name,color,active:true, initials: initials ? initials.toUpperCase() : null});
     const row = Array.isArray(created) ? created[0] : created;
     state.employees.push(row);
     render();
@@ -2890,21 +3163,20 @@ async function saveItem(){
   if(st.mode==="create"){
     const extraDates = st.extraDates ? Array.from(st.extraDates) : [];
     const allDates = [d.item_date, ...extraDates];
-    let anySplit = false, anyTruncated = false;
+    let anySplit = false;
     try{
       await withUndoBatch(allDates.length>1 ? ("dodavanje na "+allDates.length+" dana") : "dodavanje", async ()=>{
         for(const dateISO of allDates){
           const dayPayload = Object.assign({}, payload, {item_date:dateISO});
-          const split = computeLunchSplit(d.item_type, d.start_time, d.duration_minutes);
-          if(!split){
+          const segments = computeSplitAroundOccupied(d.item_type, d.start_time, d.duration_minutes, d.employee_id, dateISO, null);
+          if(!segments){
             const row = await Items.create(dayPayload); state.items.push(row);
-          } else if(!split.splitInTwo){
-            const row = await Items.create(Object.assign({}, dayPayload, split.shifted)); state.items.push(row);
-            anySplit = true; if(split.truncated) anyTruncated = true;
           } else {
-            const row1 = await Items.create(Object.assign({}, dayPayload, split.seg1)); state.items.push(row1);
-            const row2 = await Items.create(Object.assign({}, dayPayload, split.seg2)); state.items.push(row2);
-            anySplit = true; if(split.truncated) anyTruncated = true;
+            anySplit = true;
+            for(const seg of segments){
+              const row = await Items.create(Object.assign({}, dayPayload, seg));
+              state.items.push(row);
+            }
           }
         }
       });
@@ -2912,40 +3184,31 @@ async function saveItem(){
       const parts = [];
       if(allDates.length>1) parts.push(`Kreirano na ${allDates.length} dana.`);
       else parts.push("Task dodan.");
-      if(anySplit) parts.push("Neki unosi su razdvojeni/pomaknuti zbog pauze za ručak.");
-      if(anyTruncated) parts.push("Dio je skraćen da stane do kraja radnog dana (17:00).");
+      if(anySplit) parts.push("Neki unosi su razdvojeni oko postojećih obaveza (pauza/drugi task) — ukupno trajanje je sačuvano.");
       showToast(parts.join(" "));
-      maybePlayCreationSound();
     }catch(err){ st.error=err.message; render(); }
     return;
   }
 
-  // EDIT mode (postojeća stavka) - nepromijenjeno
-  const split = computeLunchSplit(d.item_type, d.start_time, d.duration_minutes);
-  const splitInTwo = !!(split && split.splitInTwo);
-  const shiftWhole = !!(split && !split.splitInTwo);
+  // EDIT mode (postojeća stavka)
+  const segments = computeSplitAroundOccupied(d.item_type, d.start_time, d.duration_minutes, d.employee_id, d.item_date, st.id);
 
   try{
-    if(splitInTwo){
-      const payload1 = Object.assign({}, payload, split.seg1);
-      const payload2 = Object.assign({}, payload, split.seg2);
-      await withUndoBatch("razdvajanje preko pauze", async ()=>{
+    if(segments){
+      await withUndoBatch("razdvajanje oko postojećih obaveza", async ()=>{
+        const payload1 = Object.assign({}, payload, segments[0]);
         const row1 = await Items.update(st.id, payload1);
         const idx = state.items.findIndex(x=>x.id===st.id);
         if(idx>-1) state.items[idx] = Array.isArray(row1)?row1[0]:row1;
-        const row2 = await Items.create(payload2); state.items.push(Array.isArray(row2)?row2[0]:row2);
+        for(let i=1;i<segments.length;i++){
+          const row = await Items.create(Object.assign({}, payload, segments[i]));
+          state.items.push(Array.isArray(row)?row[0]:row);
+        }
       });
       state.itemModal=null; render();
-      showToast("Task ide preko pauze — razdvojen u dvije stavke (prije i poslije ručka), ukupno trajanje sačuvano."+(split.truncated?" Dio poslije ručka je skraćen da stane do kraja radnog dana (17:00).":""));
-      return;
-    }
-    if(shiftWhole){
-      const payload1 = Object.assign({}, payload, split.shifted);
-      const row1 = await Items.update(st.id, payload1);
-      const idx = state.items.findIndex(x=>x.id===st.id);
-      if(idx>-1) state.items[idx] = Array.isArray(row1)?row1[0]:row1;
-      state.itemModal=null; render();
-      showToast("Odabrano vrijeme je u pauzi za ručak — pomaknuto na 13:00."+(split.truncated?" Trajanje je skraćeno da stane do kraja radnog dana (17:00).":""));
+      showToast(segments.length===1
+        ? "Vrijeme je prilagođeno da ne upada u postojeću obavezu (pomaknuto na "+segments[0].start_time+")."
+        : "Task ide preko postojeće obaveze — razdvojen u "+segments.length+" dijela, ukupno trajanje sačuvano.");
       return;
     }
     const updated = await Items.update(st.id, payload);
@@ -3016,17 +3279,10 @@ function onDragMove(e){
 }
 async function createCopyAt(item, changedFields){
   const base = Object.assign({}, itemDataFields(item), changedFields);
-  const split = computeLunchTrim(base.item_type, base.start_time, base.duration_minutes);
-  if(!split){
-    const row = await Items.create(base); state.items.push(row);
-  } else if(!split.splitInTwo){
-    const row = await Items.create(Object.assign({}, base, split.shifted)); state.items.push(row);
-  } else {
-    await withUndoBatch("kopiranje (Alt+povuci)", async ()=>{
-      const row1 = await Items.create(Object.assign({}, base, split.seg1)); state.items.push(row1);
-      const row2 = await Items.create(Object.assign({}, base, split.seg2)); state.items.push(row2);
-    });
-  }
+  const extra = trimAgainstOthersAndDailyCap(base.item_type, base.start_time, base.duration_minutes, base.employee_id, base.item_date, null);
+  const row = await Items.create(Object.assign({}, base, {start_time:extra.start_time, duration_minutes:extra.duration_minutes})); state.items.push(row);
+  if(extra.capped) showToast("Kopija prelazi dnevnu kvotu od 7h — skraćena na "+minutesToHM(extra.duration_minutes)+".");
+  else if(extra.changed) showToast("Kopirano na "+extra.start_time+" — tamo je bilo zauzeto.");
 }
 async function onDragEnd(e){
   document.removeEventListener("mousemove", onDragMove);
@@ -3053,7 +3309,7 @@ async function onDragEnd(e){
     catch(err){ showToast("Greška kod kopiranja: "+err.message); }
     return;
   }
-  try{ await applyChangeWithLunchSplit(item, payload); render(); }
+  try{ await applyChangeWithLunchSplit(item, payload, d.mode); render(); }
   catch(err){ showToast("Greška kod pomicanja: "+err.message); await loadVisibleItems(true); render(); }
 }
 /* ---- multi-day mini-board drag (precise time + day/employee move) ---- */
@@ -3124,7 +3380,7 @@ async function onMiniDragEnd(e){
     catch(err){ showToast("Greška kod kopiranja: "+err.message); }
     return;
   }
-  try{ await applyChangeWithLunchSplit(item, payload); render(); }
+  try{ await applyChangeWithLunchSplit(item, payload, "move"); render(); }
   catch(err){ showToast("Greška kod pomicanja: "+err.message); await loadVisibleItems(true); render(); }
 }
 function addItemFromBoardClick(boardEl, e){
@@ -3169,7 +3425,7 @@ async function onMiniResizeEnd(e){
   suppressClickUntil = Date.now()+300; // resize je promijenio raspored ispod kursora - blokiraj sljedeći "duh-klik"
   const item = state.items.find(x=>x.id===d.id);
   if(!item) return;
-  try{ await applyChangeWithLunchSplit(item, {duration_minutes:d.pendingDuration}); render(); }
+  try{ await applyChangeWithLunchSplit(item, {duration_minutes:d.pendingDuration}, "resize"); render(); }
   catch(err){ showToast("Greška kod promjene trajanja: "+err.message); await loadVisibleItems(true); render(); }
 }
 
@@ -3398,7 +3654,7 @@ function renderMonthOverviewModal(){
   </div>`;
 }
 
-const BUILD_ID = "2026-09-01 19:55 UTC";
+const BUILD_ID = "2026-09-03 18:30 UTC";
 console.log("Raspored build:", BUILD_ID);
 document.addEventListener("DOMContentLoaded", ()=>{
   const tag = document.createElement("div");
